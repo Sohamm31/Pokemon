@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Team Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3B4CCA;
+            --secondary-color: #FFDE00;
+            --accent-color: #CC0000;
+            --light-color: #f4f4f4;
+            --dark-color: #222;
+            --font-family: 'Nunito', sans-serif;
+        }
+
+        /* --- Global Styles & Resets --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+            transition: background-color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 20px;
+        }
+
+        button {
+            font-family: var(--font-family);
+            font-weight: 700;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            background: var(--primary-color);
+            color: #fff;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            cursor: pointer;
+            color: var(--secondary-color);
+            text-shadow: 2px 2px 2px var(--dark-color);
+        }
+
+        .navbar .nav-links a, .navbar .nav-links button {
+            color: #fff;
+            padding: 10px;
+            margin: 0 5px;
+            text-decoration: none;
+            font-weight: 700;
+            background: none;
+            font-size: 1rem;
+        }
+
+        .navbar .nav-links a:hover, .navbar .nav-links button:hover {
+            color: var(--secondary-color);
+        }
+
+        /* --- Page Sections --- */
+        .page {
+            display: none;
+            padding: 40px 0;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* --- Landing Page --- */
+        #landing-page {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        #landing-page h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--primary-color);
+        }
+
+        #landing-page p {
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
+
+        /* --- Pokédex & Teams Page --- */
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .page-header h2 {
+            font-size: 2.5rem;
+            font-weight: 900;
+        }
+        .search-bar {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px;
+            border-radius: 20px;
+            border: 2px solid #ccc;
+            margin-top: 20px;
+            font-size: 1rem;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* --- Pokémon & Team Cards --- */
+        .card {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:not(.team-card) {
+             cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .card-header {
+            padding: 20px;
+            text-align: center;
+        }
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .card-body {
+            padding: 0 20px 20px;
+        }
+        .card p {
+            display: flex;
+            justify-content: space-between;
+        }
+        .pokemon-type {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 10px;
+            color: #fff;
+            margin-top: 10px;
+            text-transform: capitalize;
+            font-weight: 700;
+        }
+
+        /* Team Card Specifics */
+        .team-card {
+            cursor: pointer;
+        }
+        .team-preview {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            padding: 10px;
+        }
+        .team-preview-pokemon {
+            width: 40px;
+            height: 40px;
+            background: #eee;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 900;
+            font-size: 0.8rem;
+        }
+        .team-pokemons-list {
+            display: none;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+        .team-pokemons-list.expanded {
+            display: block;
+        }
+        .card-footer {
+            display: flex;
+            justify-content: space-around;
+            background: #f1f1f1;
+            padding: 10px;
+        }
+        .card-footer button {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+         .card-footer button.delete {
+            background-color: var(--accent-color);
+        }
+
+        /* --- Modals --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 20px 30px 30px;
+            border-radius: 15px;
+            width: 95%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px; right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        .modal-content h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .modal-form input[type="text"],
+        .modal-form input[type="email"],
+        .modal-form input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .modal-form button[type="submit"] {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: #fff;
+            margin-top: 15px;
+        }
+        .form-toggle {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .form-toggle a {
+            color: var(--primary-color);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* --- New Team Modal Styles --- */
+        #team-modal .modal-content {
+            max-width: 900px; /* Wider modal for two panels */
+        }
+        .team-builder-layout {
+            display: flex;
+            gap: 20px;
+        }
+        .pokemon-selection-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+        }
+        .team-preview-panel {
+            flex: 1;
+            background: #f4f4f4;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .selector-controls {
+            margin-bottom: 15px;
+        }
+        .type-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .type-filters button {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            background: #e0e0e0;
+        }
+        .type-filters button.active {
+            background: var(--accent-color);
+            color: #fff;
+        }
+        #team-pokemon-selector-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            overflow-y: auto;
+            max-height: 350px;
+            padding-right: 10px;
+        }
+        .selector-card {
+            border: 2px solid #eee;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .selector-card:hover {
+            border-color: var(--secondary-color);
+        }
+        .selector-card.selected {
+            border-color: var(--primary-color);
+            background: #e7f0ff;
+            transform: scale(1.05);
+        }
+        .selector-card span {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+        .team-preview-slots {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+        .preview-slot {
+            height: 80px;
+            background: #fff;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 5px;
+            text-align: center;
+            overflow: hidden;
+        }
+        .preview-slot.filled {
+            border-style: solid;
+            border-color: var(--primary-color);
+        }
+        
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .navbar .container { flex-direction: column; }
+            .nav-links { margin-top: 10px; }
+            #landing-page h1 { font-size: 2.5rem; }
+            #landing-page p { font-size: 1.2rem; }
+            .team-builder-layout { flex-direction: column; }
+            #team-pokemon-selector-grid { max-height: 200px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">PokéBuilder</div>
+            <div class="nav-links">
+                <a href="#pokedex" id="nav-pokedex">Pokédex</a>
+                <a href="#teams" id="nav-teams" style="display:none;">My Teams</a>
+                <button id="auth-btn">Login / Signup</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+
+        <section id="landing-page" class="page active">
+            <h1>Welcome, Pokémon Trainer!</h1>
+            <p>Build your ultimate team and prepare for battle.</p>
+        </section>
+
+        <section id="pokedex-page" class="page">
+            <div class="page-header">
+                <h2>The Pokédex</h2>
+                <input type="text" id="pokedex-search" class="search-bar" placeholder="Search for a Pokémon...">
+            </div>
+            <div id="pokedex-grid" class="grid-container">
+                </div>
+        </section>
+
+        <section id="teams-page" class="page">
+            <div class="page-header">
+                <h2>My Teams</h2>
+                <button id="create-team-btn" style="background-color: var(--accent-color); color: #fff; margin-top: 10px;">Create New Team</button>
+            </div>
+            <div id="teams-grid" class="grid-container">
+                </div>
+        </section>
+    </main>
+
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <form id="login-form" class="modal-form">
+                <h2>Login</h2>
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+                <p class="form-toggle">Don't have an account? <a id="show-signup">Sign up</a></p>
+            </form>
+            <form id="signup-form" class="modal-form" style="display:none;">
+                <h2>Sign Up</h2>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Sign Up</button>
+                <p class="form-toggle">Already have an account? <a id="show-login">Login</a></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="team-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <form id="team-form" class="modal-form">
+                <h2 id="team-modal-title">Create Team</h2>
+                <input type="hidden" id="team-id-input">
+                <input type="text" id="team-name-input" placeholder="Team Name" required>
+
+                <div class="team-builder-layout">
+                    <div class="pokemon-selection-panel">
+                        <div class="selector-controls">
+                            <input type="text" id="selector-search" placeholder="Search Pokémon...">
+                            <div id="selector-type-filters" class="type-filters">
+                                </div>
+                        </div>
+                        <div id="team-pokemon-selector-grid">
+                            </div>
+                    </div>
+
+                    <div class="team-preview-panel">
+                        <h3>Team Preview</h3>
+                        <div id="team-preview-slots" class="team-preview-slots">
+                            </div>
+                    </div>
+                </div>
+
+                <button type="submit">Save Team</button>
+            </form>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- GLOBAL STATE & CONFIG ---
+    const API_BASE_URL = ''; // Use relative path
+    let authToken = localStorage.getItem('pokemonToken');
+    let allPokemons = [];
+    let selectedPokemonForTeam = [];
+
+    // --- DOM ELEMENT SELECTORS ---
+    const pages = document.querySelectorAll('.page');
+    const navPokedex = document.getElementById('nav-pokedex');
+    const navTeams = document.getElementById('nav-teams');
+    const authBtn = document.getElementById('auth-btn');
+    const logo = document.querySelector('.logo');
+    const pokedexGrid = document.getElementById('pokedex-grid');
+    const pokedexSearch = document.getElementById('pokedex-search');
+    const teamsGrid = document.getElementById('teams-grid');
+    const createTeamBtn = document.getElementById('create-team-btn');
+
+    // Modals
+    const authModal = document.getElementById('auth-modal');
+    const teamModal = document.getElementById('team-modal');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const teamForm = document.getElementById('team-form');
+    
+    // New Team Modal Elements
+    const teamPokemonSelectorGrid = document.getElementById('team-pokemon-selector-grid');
+    const selectorSearch = document.getElementById('selector-search');
+    const selectorTypeFilters = document.getElementById('selector-type-filters');
+    const teamPreviewSlots = document.getElementById('team-preview-slots');
+
+
+    // --- API HELPER FUNCTIONS ---
+    const apiFetch = async (endpoint, options = {}) => {
+        options.headers = { ...options.headers, 'Content-Type': 'application/json' };
+        if (authToken) {
+            options.headers['Authorization'] = `Bearer ${authToken}`;
+        }
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Error: ${errorData.detail || 'Something went wrong'}`);
+            throw new Error(errorData.detail);
+        }
+        return response.status !== 204 ? response.json() : null;
+    };
+
+    // --- UI RENDERING ---
+    const showPage = (pageId) => {
+        pages.forEach(page => page.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+    };
+
+    const updateUIForAuthState = () => {
+        if (authToken) {
+            authBtn.textContent = 'Logout';
+            navTeams.style.display = 'inline-block';
+        } else {
+            authBtn.textContent = 'Login / Signup';
+            navTeams.style.display = 'none';
+            showPage('landing-page');
+        }
+    };
+
+    const renderPokedex = (pokemons) => {
+        pokedexGrid.innerHTML = pokemons.map(p => `
+            <div class="card">
+                <div class="card-header">
+                    <h3>#${p.id} ${p.name}</h3>
+                    <span class="pokemon-type" style="background-color: ${getTypeColor(p.type1)};">${p.type1}</span>
+                    ${p.type2 ? `<span class="pokemon-type" style="background-color: ${getTypeColor(p.type2)};">${p.type2}</span>` : ''}
+                </div>
+                <div class="card-body">
+                    <p><strong>HP:</strong> ${p.HP}</p>
+                    <p><strong>Attack:</strong> ${p.Attack}</p>
+                    <p><strong>Defense:</strong> ${p.Defense}</p>
+                </div>
+            </div>
+        `).join('');
+    };
+    
+    const renderTeams = (teams) => {
+        teamsGrid.innerHTML = teams.map(team => `
+            <div class="card team-card" data-team-id="${team.id}">
+                <div class="card-header">
+                    <h3>${team.name}</h3>
+                </div>
+                <div class="team-preview">
+                    ${team.pokemons.slice(0, 6).map(p => `<div class="team-preview-pokemon" title="${p.name}">${p.name.substring(0,2).toUpperCase()}</div>`).join('')}
+                    ${team.pokemons.length > 6 ? `<div>...</div>` : ''}
+                </div>
+                <div class="team-pokemons-list">
+                    <h4>Pokémon:</h4>
+                    ${team.pokemons.map(p => `<p>• ${p.name}</p>`).join('')}
+                </div>
+                <div class="card-footer">
+                    <button class="edit-team-btn" data-team-id="${team.id}">Edit</button>
+                    <button class="delete-team-btn delete" data-team-id="${team.id}">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    };
+
+    // --- INITIALIZATION & EVENT LISTENERS ---
+    const init = async () => {
+        updateUIForAuthState();
+        try {
+            // Using Promise.all to fetch data more efficiently
+            const [pokemonData] = await Promise.all([
+                apiFetch('/pokemon')
+            ]);
+            allPokemons = pokemonData;
+            renderPokedex(allPokemons);
+            populateTypeFilters();
+        } catch (error) {
+            console.error("Could not fetch Pokémon:", error);
+            pokedexGrid.innerHTML = "<p>Could not load Pokédex. Is the API server running?</p>";
+        }
+    };
+
+    // Navigation and Auth
+    logo.addEventListener('click', () => showPage('landing-page'));
+    navPokedex.addEventListener('click', (e) => { e.preventDefault(); showPage('pokedex-page'); });
+    navTeams.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!authToken) return;
+        try {
+            const teams = await apiFetch('/teams');
+            renderTeams(teams);
+            showPage('teams-page');
+        } catch (error) { console.error('Failed to fetch teams:', error); }
+    });
+    authBtn.addEventListener('click', () => {
+        if (authToken) {
+            authToken = null;
+            localStorage.removeItem('pokemonToken');
+            updateUIForAuthState();
+        } else {
+            loginForm.style.display = 'block';
+            signupForm.style.display = 'none';
+            authModal.classList.add('active');
+        }
+    });
+    document.getElementById('show-signup').addEventListener('click', () => { loginForm.style.display = 'none'; signupForm.style.display = 'block'; });
+    document.getElementById('show-login').addEventListener('click', () => { signupForm.style.display = 'none'; loginForm.style.display = 'block'; });
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new URLSearchParams();
+        formData.append('username', e.target.username.value);
+        formData.append('password', e.target.password.value);
+        try {
+            const response = await fetch(`${API_BASE_URL}/login`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData });
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.detail || 'Login failed');
+            }
+            const data = await response.json();
+            authToken = data.access_token;
+            localStorage.setItem('pokemonToken', authToken);
+            updateUIForAuthState();
+            authModal.classList.remove('active');
+        } catch (error) { alert(error.message); }
+    });
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userData = { email: e.target.email.value, username: e.target.username.value, password: e.target.password.value };
+        try {
+            await apiFetch('/create_user', { method: 'POST', body: JSON.stringify(userData) });
+            alert('Signup successful! Please log in.');
+            document.getElementById('show-login').click();
+        } catch (error) { console.error('Signup failed:', error); }
+    });
+    pokedexSearch.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredPokemons = allPokemons.filter(p => p.name.toLowerCase().includes(searchTerm));
+        renderPokedex(filteredPokemons);
+    });
+
+    // --- TEAM MANAGEMENT LOGIC ---
+
+    const openTeamModal = (team = null) => {
+        teamForm.reset();
+        selectorSearch.value = '';
+        document.getElementById('team-id-input').value = team ? team.id : '';
+        document.getElementById('team-modal-title').textContent = team ? 'Edit Team' : 'Create Team';
+        document.getElementById('team-name-input').value = team ? team.name : '';
+        
+        selectedPokemonForTeam = team ? team.pokemons.map(p => p.id) : [];
+
+        applySelectorFilters();
+        updateTeamPreview();
+        teamModal.classList.add('active');
+    };
+    
+    const applySelectorFilters = () => {
+        const searchTerm = selectorSearch.value.toLowerCase();
+        const activeTypeFilter = document.querySelector('.type-filters button.active');
+        const type = activeTypeFilter ? activeTypeFilter.dataset.type : null;
+
+        const filteredPokemons = allPokemons.filter(p => {
+            const nameMatch = p.name.toLowerCase().includes(searchTerm);
+            const typeMatch = !type || p.type1.toLowerCase() === type || (p.type2 && p.type2.toLowerCase() === type);
+            return nameMatch && typeMatch;
+        });
+        renderSelectorGrid(filteredPokemons);
+    };
+
+    const renderSelectorGrid = (pokemons) => {
+        teamPokemonSelectorGrid.innerHTML = pokemons.map(p => `
+            <div class="selector-card ${selectedPokemonForTeam.includes(p.id) ? 'selected' : ''}" data-pokemon-id="${p.id}">
+                <span>${p.name}</span>
+            </div>
+        `).join('');
+    };
+
+    const updateTeamPreview = () => {
+        teamPreviewSlots.innerHTML = '';
+        for (let i = 0; i < 6; i++) {
+            const pokemonId = selectedPokemonForTeam[i];
+            if (pokemonId) {
+                const pokemon = allPokemons.find(p => p.id === pokemonId);
+                teamPreviewSlots.innerHTML += `
+                    <div class="preview-slot filled" style="border-color: ${getTypeColor(pokemon.type1)};">
+                        ${pokemon.name}
+                        <span class="pokemon-type" style="font-size: 0.7rem; padding: 2px 5px; margin-top: 4px; background-color: ${getTypeColor(pokemon.type1)};">${pokemon.type1}</span>
+                    </div>`;
+            } else {
+                teamPreviewSlots.innerHTML += `<div class="preview-slot">Slot ${i + 1}</div>`;
+            }
+        }
+    };
+    
+    // Event Listeners for Team Modal
+    createTeamBtn.addEventListener('click', () => openTeamModal());
+    selectorSearch.addEventListener('input', applySelectorFilters);
+    selectorTypeFilters.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON') {
+            const currentActive = document.querySelector('.type-filters button.active');
+            if (currentActive) {
+                currentActive.classList.remove('active');
+            }
+            // If the clicked button was not the one that was active, make it active.
+            // This allows toggling the filter off.
+            if (currentActive !== e.target) {
+                 e.target.classList.add('active');
+            }
+            applySelectorFilters();
+        }
+    });
+
+    teamPokemonSelectorGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('.selector-card');
+        if (!card) return;
+
+        const pokemonId = parseInt(card.dataset.pokemonId);
+        const index = selectedPokemonForTeam.indexOf(pokemonId);
+
+        if (index > -1) { // Pokemon is already selected, so deselect it
+            selectedPokemonForTeam.splice(index, 1);
+            card.classList.remove('selected');
+        } else { // Pokemon is not selected, so select it
+            if (selectedPokemonForTeam.length >= 6) {
+                alert('A team can have a maximum of 6 Pokémon.');
+                return;
+            }
+            selectedPokemonForTeam.push(pokemonId);
+            card.classList.add('selected');
+        }
+        updateTeamPreview();
+    });
+
+    teamsGrid.addEventListener('click', async (e) => {
+        const teamCard = e.target.closest('.team-card');
+        if (!teamCard) return;
+
+        // Expand/collapse team view if not clicking a button
+        if (!e.target.closest('button')) {
+            teamCard.querySelector('.team-pokemons-list').classList.toggle('expanded');
+        }
+
+        if (e.target.classList.contains('edit-team-btn')) {
+            const teamId = e.target.dataset.teamId;
+            const teams = await apiFetch('/teams');
+            const team = teams.find(t => t.id == teamId);
+            openTeamModal(team);
+        }
+
+        if (e.target.classList.contains('delete-team-btn')) {
+            if (!confirm('Are you sure you want to delete this team?')) return;
+            const teamId = e.target.dataset.teamId;
+            try {
+                await apiFetch(`/teams/${teamId}`, { method: 'DELETE' });
+                navTeams.click(); // Refresh team list
+            } catch (error) { console.error('Failed to delete team:', error); }
+        }
+    });
+
+    teamForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const teamId = document.getElementById('team-id-input').value;
+        const teamData = {
+            name: document.getElementById('team-name-input').value,
+            pokemon_ids: selectedPokemonForTeam
+        };
+
+        try {
+            if (teamId) {
+                await apiFetch(`/teams/${teamId}`, { method: 'PUT', body: JSON.stringify(teamData) });
+            } else {
+                await apiFetch('/teams', { method: 'POST', body: JSON.stringify(teamData) });
+            }
+            teamModal.classList.remove('active');
+            navTeams.click(); // Refresh team list
+        } catch (error) { console.error('Failed to save team:', error); }
+    });
+
+    // Modal Closing Logic
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', () => {
+            btn.closest('.modal').classList.remove('active');
+        });
+    });
+    
+    // --- UTILITY FUNCTIONS ---
+    const populateTypeFilters = () => {
+        const types = [...new Set(allPokemons.flatMap(p => [p.type1, p.type2]).filter(Boolean))].sort();
+        selectorTypeFilters.innerHTML = types.map(type => `<button data-type="${type.toLowerCase()}">${type}</button>`).join('');
+    };
+
+    const getTypeColor = (type) => {
+        const colors = {
+            grass: '#78C850', poison: '#A040A0', fire: '#F08030', flying: '#A890F0',
+            water: '#6890F0', bug: '#A8B820', normal: '#A8A878', electric: '#F8D030',
+            ground: '#E0C068', fairy: '#EE99AC', fighting: '#C03028', psychic: '#F85888',
+            rock: '#B8A038', steel: '#B8B8D0', ice: '#98D8D8', ghost: '#705898', dragon: '#7038F8',
+            dark: '#705848', shadow: '#493963'
+        };
+        return colors[type.toLowerCase()] || '#68A090'; // Default color
+    };
+
+    // --- LET'S GO! ---
+    init();
+});
+</script>
+</body>
+</html>
