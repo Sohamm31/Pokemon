@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Prophet - Pokémon Team Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3B4CCA;
+            --primary-gradient: linear-gradient(135deg, #3B4CCA 0%, #5A6EF0 100%);
+            --secondary-color: #FFDE00;
+            --accent-color: #CC0000;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --font-family: 'Nunito', sans-serif;
+            --cartoon-font: 'Fredoka One', cursive;
+            --card-shadow: 0 10px 25px rgba(59, 76, 202, 0.1);
+            --border-radius: 20px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background: linear-gradient(135deg, var(--light-color) 0%, #e2e8f0 100%); }
+        .container { max-width: 1200px; margin: auto; padding: 0 20px; }
+        button { font-family: var(--font-family); font-weight: 700; border: none; padding: 12px 24px; border-radius: var(--border-radius); cursor: pointer; }
+        .navbar { background: var(--primary-gradient); color: #fff; padding: 1rem 0; position: sticky; top: 0; z-index: 1000; box-shadow: var(--card-shadow); }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .navbar .logo { font-family: var(--cartoon-font); font-size: 2rem; color: var(--secondary-color); text-shadow: 3px 3px 6px rgba(0,0,0,0.3); text-decoration: none; }
+        .navbar .nav-links { display: flex; align-items: center; gap: 10px; }
+        .navbar .nav-links a { color: #fff; padding: 10px 20px; text-decoration: none; font-weight: 700; background: rgba(255,255,255,0.1); border-radius: 25px; font-size: 1rem; }
+        .hamburger { display: none; cursor: pointer; }
+        .hamburger .bar { display: block; width: 25px; height: 3px; margin: 5px auto; transition: all 0.3s ease-in-out; background-color: white; }
+        main { padding: 40px 0; }
+        .page-header { text-align: center; margin-bottom: 20px; }
+        .page-header h2 { font-family: var(--cartoon-font); font-size: 3rem; color: var(--primary-color); }
+        .game-layout { display: grid; grid-template-columns: 3fr 1fr; gap: 40px; }
+        .game-area, .leaderboard-area { background: #fff; padding: 30px; border-radius: var(--border-radius); box-shadow: var(--card-shadow); }
+        .scoreboard { text-align: center; margin-bottom: 20px; font-size: 1.2rem; font-weight: 700; }
+        .matchup-zone { display: flex; justify-content: space-around; align-items: center; }
+        .matchup-card { flex-basis: 45%; border: 4px solid #eee; border-radius: var(--border-radius); padding: 20px; cursor: pointer; transition: all 0.3s ease; }
+        .matchup-card:hover { transform: translateY(-5px); border-color: var(--secondary-color); }
+        .matchup-card.disabled { cursor: not-allowed; opacity: 0.6; pointer-events: none; }
+        .matchup-card h3 { text-align: center; font-size: 1.5rem; margin-bottom: 15px; }
+        .matchup-card .types-container { text-align: center; }
+        .pokemon-type { display: inline-block; padding: 6px 15px; border-radius: 20px; color: #fff; margin: 5px; text-transform: capitalize; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .vs-separator { font-family: var(--cartoon-font); font-size: 3rem; color: var(--accent-color); }
+        #instruction-text { text-align: center; margin-top: 20px; font-size: 1.2rem; font-weight: bold; }
+        #result-area { text-align: center; margin-top: 20px; display: none; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #outcome-message { font-size: 2.5rem; margin: 15px 0; font-weight: 900; }
+        #outcome-message.correct { color: #22c55e; }
+        #outcome-message.incorrect { color: #ef4444; }
+        #next-battle-btn { background: var(--primary-gradient); color: #fff; margin-top: 20px; }
+        .leaderboard-area h3 { font-family: var(--cartoon-font); text-align: center; margin-bottom: 20px; font-size: 1.8rem; }
+        .leaderboard-list { list-style: none; padding: 0; }
+        .leaderboard-list li { display: flex; justify-content: space-between; padding: 10px; border-radius: 10px; }
+        .leaderboard-list li:nth-child(odd) { background-color: #f1f5f9; }
+        .leaderboard-list .rank { font-weight: 900; margin-right: 10px; }
+        .leaderboard-list .score { font-weight: 700; }
+        
+        @media (max-width: 992px) {
+            .game-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .navbar .nav-links {
+                position: fixed;
+                left: -100%;
+                top: 70px;
+                gap: 0;
+                flex-direction: column;
+                background-color: var(--primary-color);
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                padding-bottom: 20px;
+                box-shadow: 0 10px 10px rgba(0,0,0,0.1);
+            }
+            .navbar .nav-links.active { left: 0; }
+            .navbar .nav-links a { margin: 16px 0; }
+            .hamburger { display: block; }
+            .hamburger.active .bar:nth-child(2) { opacity: 0; }
+            .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+            .matchup-zone { flex-direction: column; gap: 20px; }
+            .vs-separator { display: none; }
+            .page-header h2 { font-size: 2.5rem; }
+            .game-area, .leaderboard-area { padding: 20px; }
+        }
+        @media (max-width: 480px) {
+            .navbar .logo { font-size: 1.8rem; }
+            .page-header h2 { font-size: 2.2rem; }
+            .matchup-card h3 { font-size: 1.3rem; }
+            #outcome-message { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">PokéBuilder</a>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+            <div class="nav-links">
+                <a href="/pokedex.html">Pokédex</a>
+                <a href="/teams.html">My Teams</a>
+                <a href="/battle.html">PokéStreak</a>
+                <a href="/auth.html" id="auth-btn">Login / Signup</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="page-header">
+            <h2>PokéStreak</h2>
+        </div>
+        <div class="game-layout">
+            <div class="game-area">
+                <div class="scoreboard">
+                    Current Streak: <span id="current-score">0</span> | Your High Score: <span id="high-score">0</span>
+                </div>
+                <div id="game-zone">
+                    <div class="matchup-zone">
+                        <div class="matchup-card" id="pokemon-a-card"></div>
+                        <div class="vs-separator">VS</div>
+                        <div class="matchup-card" id="pokemon-b-card"></div>
+                    </div>
+                    <p id="instruction-text">Who will win? Click your choice!</p>
+                </div>
+                <div id="result-area">
+                    <p>You Picked: <strong id="user-pick"></strong></p>
+                    <p>The battle model Predicted: <strong id="oracle-pick"></strong> with <strong id="oracle-prob"></strong>% probability</p>
+                    <h3 id="outcome-message"></h3>
+                    <p id="points-awarded"></p>
+                    <button id="next-battle-btn">Next Battle</button>
+                </div>
+            </div>
+            <div class="leaderboard-area">
+                <h3>Top Trainers</h3>
+                <ol id="leaderboard-list" class="leaderboard-list"></ol>
+            </div>
+        </div>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // --- Navbar Logic ---
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navLinks.classList.toggle('active');
+    });
+
+    const authToken = localStorage.getItem('pokemonToken');
+    if (!authToken) {
+        window.location.href = `/auth.html?redirect=${window.location.pathname}`;
+        return;
+    }
+
+    // --- DOM Elements ---
+    const authBtn = document.getElementById('auth-btn');
+    const currentScoreEl = document.getElementById('current-score');
+    const highScoreEl = document.getElementById('high-score');
+    const cardA = document.getElementById('pokemon-a-card');
+    const cardB = document.getElementById('pokemon-b-card');
+    const instructionText = document.getElementById('instruction-text');
+    const resultArea = document.getElementById('result-area');
+    const gameZone = document.getElementById('game-zone');
+    const userPickEl = document.getElementById('user-pick');
+    const oraclePickEl = document.getElementById('oracle-pick');
+    const oracleProbEl = document.getElementById('oracle-prob');
+    const outcomeMessageEl = document.getElementById('outcome-message');
+    const pointsAwardedEl = document.getElementById('points-awarded');
+    const nextBattleBtn = document.getElementById('next-battle-btn');
+    const leaderboardList = document.getElementById('leaderboard-list');
+
+    // --- Game State & Difficulty Tiers ---
+    let pokemonTiers = { easy: [], medium: [], hard: [] };
+    let currentUser = null;
+    let currentScore = 0;
+    let highScore = 0;
+    let pokemonA = null;
+    let pokemonB = null;
+
+    // --- API Helper ---
+    const apiFetch = async (endpoint, options = {}) => {
+        options.headers = { ...options.headers, 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` };
+        const response = await fetch(endpoint, options);
+        if (response.status === 401) {
+            localStorage.removeItem('pokemonToken');
+            window.location.href = `/auth.html?redirect=${window.location.pathname}`;
+            throw new Error("Unauthorized");
+        }
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Error: ${errorData.detail || 'Something went wrong'}`);
+            throw new Error(errorData.detail);
+        }
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            return response.json();
+        }
+        return null;
+    };
+
+    // --- UI Rendering ---
+    const renderPokemonCard = (pokemon, element) => {
+        element.innerHTML = `
+            <h3>${pokemon.name}</h3>
+            <div class="types-container">
+                <span class="pokemon-type" style="background-color: ${getTypeColor(pokemon.type1)};">${pokemon.type1}</span>
+                ${pokemon.type2 ? `<span class="pokemon-type" style="background-color: ${getTypeColor(pokemon.type2)};">${pokemon.type2}</span>` : ''}
+            </div>
+        `;
+        element.dataset.pokemonId = pokemon.id;
+    };
+    
+    const renderLeaderboard = (users) => {
+        leaderboardList.innerHTML = users.map((user, index) => `
+            <li>
+                <span><span class="rank">${index + 1}.</span> ${user.username}</span>
+                <span class="score">${user.high_score}</span>
+            </li>
+        `).join('');
+    };
+
+    // --- Game Logic ---
+    const startNewRound = () => {
+        resultArea.style.display = 'none';
+        gameZone.style.display = 'block';
+        instructionText.textContent = "Who will win? Click your choice!";
+        
+        // --- NEW: Difficulty Logic ---
+        let pool = [];
+        if (currentScore < 500) { // Start with easy Pokémon
+            pool = pokemonTiers.easy;
+        } else if (currentScore < 1500) { // Introduce medium Pokémon
+            pool = [...pokemonTiers.easy, ...pokemonTiers.medium];
+        } else { // High scores face the toughest opponents
+            pool = [...pokemonTiers.medium, ...pokemonTiers.hard];
+        }
+        // Ensure pool is not empty
+        if(pool.length < 2) pool = pokemonTiers.easy;
+        
+        const [p1, p2] = random.sample(pool, 2);
+        pokemonA = p1;
+        pokemonB = p2;
+
+        renderPokemonCard(pokemonA, cardA);
+        renderPokemonCard(pokemonB, cardB);
+
+        cardA.classList.remove('disabled');
+        cardB.classList.remove('disabled');
+    };
+
+    const handleUserPick = async (e) => {
+        cardA.classList.add('disabled');
+        cardB.classList.add('disabled');
+        
+        const pickedId = parseInt(e.currentTarget.dataset.pokemonId);
+        const userChoice = pickedId === pokemonA.id ? pokemonA : pokemonB;
+        
+        try {
+            const prediction = await apiFetch('/predict/battle/', {
+                method: 'POST',
+                body: JSON.stringify({ pokemon1_id: pokemonA.id, pokemon2_id: pokemonB.id })
+            });
+            showResult(prediction, userChoice);
+        } catch (error) {
+            console.error("Prediction failed:", error);
+            startNewRound();
+        }
+    };
+
+    const showResult = async (prediction, userChoice) => {
+        gameZone.style.display = 'none';
+        resultArea.style.display = 'block';
+
+        userPickEl.textContent = userChoice.name;
+        oraclePickEl.textContent = prediction.predicted_winner;
+        oracleProbEl.textContent = (parseFloat(prediction.win_probability) * 100).toFixed(0);
+
+        const wasCorrect = userChoice.name === prediction.predicted_winner;
+
+        if (wasCorrect) {
+            const points = parseFloat(prediction.win_probability) < 0.5 ? 250 : 100;
+            currentScore += points;
+            currentScoreEl.textContent = currentScore;
+            outcomeMessageEl.textContent = "CORRECT!";
+            outcomeMessageEl.className = 'correct';
+            pointsAwardedEl.textContent = `+${points} points!`;
+            
+            nextBattleBtn.style.display = 'none';
+            setTimeout(startNewRound, 2000); 
+
+        } else {
+            outcomeMessageEl.textContent = "GAME OVER!";
+            outcomeMessageEl.className = 'incorrect';
+            pointsAwardedEl.textContent = `Final Streak: ${currentScore}`;
+            
+            nextBattleBtn.style.display = 'block';
+            nextBattleBtn.textContent = 'Play Again';
+
+            if (currentScore > highScore) {
+                highScore = currentScore;
+                highScoreEl.textContent = highScore;
+                pointsAwardedEl.textContent += " (New High Score!)";
+                await apiFetch('/scores/', {
+                    method: 'POST',
+                    body: JSON.stringify({ score: highScore })
+                });
+                const leaderboardData = await apiFetch('/scores/leaderboard');
+                renderLeaderboard(leaderboardData);
+            }
+            currentScore = 0;
+        }
+    };
+
+    // --- Initialization ---
+    const init = async () => {
+        authBtn.textContent = 'Logout';
+        authBtn.href = "#";
+        authBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('pokemonToken');
+            window.location.href = '/auth.html';
+        });
+
+        cardA.addEventListener('click', handleUserPick);
+        cardB.addEventListener('click', handleUserPick);
+        nextBattleBtn.addEventListener('click', () => {
+            currentScoreEl.textContent = 0;
+            startNewRound();
+        });
+
+        window.random = {
+            sample: (arr, size) => {
+                const shuffled = [...arr].sort(() => 0.5 - Math.random());
+                return shuffled.slice(0, size);
+            }
+        };
+
+        try {
+            const [userData, allPokemonData, leaderboardData] = await Promise.all([
+                apiFetch('/scores/me'),
+                apiFetch('/pokemon/'),
+                apiFetch('/scores/leaderboard')
+            ]);
+            
+            currentUser = userData;
+
+            // --- NEW: Calculate Total Stats and Create Tiers ---
+            allPokemonData.forEach(p => {
+                p.Total = p.HP + p.Attack + p.Defense + p.Sp_Atk + p.Sp_Def + p.Speed;
+                if (p.Generation === 1) {
+                    if (p.Total < 350) pokemonTiers.easy.push(p);
+                    else if (p.Total < 500) pokemonTiers.medium.push(p);
+                    else pokemonTiers.hard.push(p);
+                }
+            });
+
+            if (pokemonTiers.easy.length < 2) {
+                throw new Error("Not enough Generation 1 Pokémon to start the game.");
+            }
+
+            highScore = currentUser.battle_score ? currentUser.battle_score.score : 0;
+            highScoreEl.textContent = highScore;
+            
+            renderLeaderboard(leaderboardData);
+            startNewRound();
+
+        } catch (error) {
+            console.error("Initialization failed:", error);
+            instructionText.textContent = "Could not load game data. Please try again later.";
+        }
+    };
+    
+    const getTypeColor = (type) => {
+        const colors = {
+            grass: '#78C850', poison: '#A040A0', fire: '#F08030', flying: '#A890F0',
+            water: '#6890F0', bug: '#A8B820', normal: '#A8A878', electric: '#F8D030',
+            ground: '#E0C068', fairy: '#EE99AC', fighting: '#C03028', psychic: '#F85888',
+            rock: '#B8A038', steel: '#B8B8D0', ice: '#98D8D8', ghost: '#705898', dragon: '#7038F8',
+            dark: '#705848', shadow: '#493963'
+        };
+        return type ? colors[type.toLowerCase()] || '#68A090' : '#68A090';
+    };
+
+    init();
+});
+</script>
+</body>
+</html>

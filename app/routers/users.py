@@ -3,10 +3,13 @@ from ..database import get_db
 from typing import Annotated,List
 from sqlalchemy.orm import Session
 from fastapi import APIRouter,Depends,HTTPException,status
-from ..schemas import User,UserCreate
+from ..schemas import User,UserCreate,BattleScore
 from .. import models,token
 from fastapi.security import OAuth2PasswordRequestForm
+from .. import schemas
+from .. import schemas, models, oauth2
 
+CurrentUser = Annotated[models.User_model, Depends(oauth2.get_current_user)]
 
 
 router = APIRouter(
@@ -35,3 +38,5 @@ async def login(db:DBSession,request:OAuth2PasswordRequestForm = Depends()):
     access_token = token.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
     
+
+

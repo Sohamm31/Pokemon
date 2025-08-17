@@ -40,6 +40,8 @@ class User_model(Base):
     password = Column(String(255))  
     # One-to-Many with Team
     teams = relationship("Team", back_populates="owner")
+    battle_score = relationship("BattleScore", back_populates="user", uselist=False)
+
 
 
 class Team(Base):
@@ -54,3 +56,13 @@ class Team(Base):
 
     # Many-to-Many with Pokemon_model
     pokemons = relationship("Pokemon_model", secondary=team_pokemon, back_populates="teams")
+
+
+class BattleScore(Base):
+    __tablename__ = "battle_scores"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    score = Column(Integer, default=0, nullable=False)
+    user_id = Column(Integer, ForeignKey("user_model.id"), unique=True) 
+    
+    user = relationship("User_model", back_populates="battle_score")

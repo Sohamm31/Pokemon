@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import models
 from .database import engine
-from .routers import pokemon, users, teams
+from .routers import pokemon, users, teams,battle,score
 
 # This line creates the database tables (if they don't exist)
 models.Base.metadata.create_all(bind=engine)
@@ -42,8 +42,14 @@ async def read_teams():
 async def read_auth():
     return FileResponse('app/static/auth.html')
 
+@app.get("/battle.html", include_in_schema=False)
+async def read_battle():
+    return FileResponse('app/static/battle.html')
 # Include all the API routers
 app.include_router(pokemon.router)
 app.include_router(users.router)
 app.include_router(teams.router)
+app.include_router(battle.router) 
+app.include_router(score.router) 
+
 

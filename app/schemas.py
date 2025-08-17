@@ -14,6 +14,18 @@ class PokemonBase(BaseModel):
     Generation: int
     Legendary: bool
 
+
+class BattleScoreBase(BaseModel):
+    score: int
+
+class BattleScore(BattleScoreBase):
+    id: int
+    user_id: int
+    
+    class Config:
+        orm_mode = True
+
+
 class Pokemon(PokemonBase):
     id: int
 
@@ -30,7 +42,7 @@ class User(BaseModel):
     id: int
     email: EmailStr
     username: str
-
+    battle_score: Optional[BattleScore] = None
     class Config:
         orm_mode = True
 
@@ -58,3 +70,11 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+
+class LeaderboardUser(BaseModel):
+    username: str
+    high_score: int
+
+    class Config:
+        orm_mode = True
