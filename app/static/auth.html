@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Signup - Pokémon Team Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3B4CCA;
+            --primary-gradient: linear-gradient(135deg, #3B4CCA 0%, #5A6EF0 100%);
+            --secondary-color: #FFDE00;
+            --accent-color: #CC0000;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --font-family: 'Nunito', sans-serif;
+            --cartoon-font: 'Fredoka One', cursive;
+            --border-radius: 20px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, var(--light-color) 0%, #e2e8f0 100%);
+        }
+        .auth-container {
+            padding: 100px 20px 40px; /* Padding top for navbar */
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        .auth-content {
+             background: rgba(255,255,255,0.95);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 20px 40px rgba(59, 76, 202, 0.2);
+        }
+        .auth-content h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-family: var(--cartoon-font);
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+        .modal-form input {
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border: 2px solid rgba(59, 76, 202, 0.2);
+            border-radius: 15px;
+            font-size: 1rem;
+        }
+        .modal-form button {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: #fff;
+            margin-top: 15px;
+            padding: 15px;
+            font-size: 1.1rem;
+            border-radius: 15px;
+            border: none;
+            cursor: pointer;
+        }
+        .form-toggle { text-align: center; margin-top: 20px; }
+        .form-toggle a { color: var(--primary-color); cursor: pointer; text-decoration: underline; font-weight: 700; }
+        
+        /* --- Navbar Styles --- */
+        .navbar {
+            background: var(--primary-gradient);
+            color: #fff;
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar .container { max-width: 1200px; margin: auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar .logo { font-family: var(--cartoon-font); font-size: 2rem; color: var(--secondary-color); text-shadow: 3px 3px 6px rgba(0,0,0,0.3); text-decoration: none; }
+        .navbar .nav-links { display: flex; align-items: center; gap: 10px; }
+        .navbar .nav-links a { color: #fff; padding: 10px 20px; text-decoration: none; font-weight: 700; background: rgba(255,255,255,0.1); border-radius: 25px; font-size: 1rem; }
+        .hamburger { display: none; cursor: pointer; }
+        .hamburger .bar { display: block; width: 25px; height: 3px; margin: 5px auto; transition: all 0.3s ease-in-out; background-color: white; }
+
+        /* --- Responsive Styles --- */
+        @media (max-width: 768px) {
+            .navbar .nav-links {
+                position: fixed;
+                left: -100%;
+                top: 70px; /* Adjust based on navbar height */
+                gap: 0;
+                flex-direction: column;
+                background-color: var(--primary-color);
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                padding-bottom: 20px;
+                box-shadow: 0 10px 10px rgba(0,0,0,0.1);
+            }
+            .navbar .nav-links.active { left: 0; }
+            .navbar .nav-links a { margin: 16px 0; }
+            .hamburger { display: block; }
+            .hamburger.active .bar:nth-child(2) { opacity: 0; }
+            .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+        }
+        @media (max-width: 480px) {
+             .auth-container { padding: 80px 10px 20px; }
+             .auth-content { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">PokéBuilder</a>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+            <div class="nav-links">
+                <a href="/pokedex.html">Pokédex</a>
+                <a href="/teams.html" id="nav-teams">My Teams</a>
+                <a href="/auth.html" id="auth-btn">Login / Signup</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="auth-container">
+        <div class="auth-content">
+            <form id="login-form" class="modal-form">
+                <h2>Login</h2>
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+                <p class="form-toggle">Don't have an account? <a id="show-signup">Sign up</a></p>
+            </form>
+            <form id="signup-form" class="modal-form" style="display:none;">
+                <h2>Sign Up</h2>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Sign Up</button>
+                <p class="form-toggle">Already have an account? <a id="show-login">Login</a></p>
+            </form>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navLinks.classList.toggle('active');
+    });
+
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const showSignup = document.getElementById('show-signup');
+    const showLogin = document.getElementById('show-login');
+
+    showSignup.addEventListener('click', () => {
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'block';
+    });
+
+    showLogin.addEventListener('click', () => {
+        signupForm.style.display = 'none';
+        loginForm.style.display = 'block';
+    });
+
+    // Check if user was redirected here because they weren't logged in
+    const params = new URLSearchParams(window.location.search);
+    const redirectUrl = params.get('redirect');
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new URLSearchParams();
+        formData.append('username', e.target.username.value);
+        formData.append('password', e.target.password.value);
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.detail || 'Login failed');
+            }
+            const data = await response.json();
+            localStorage.setItem('pokemonToken', data.access_token);
+            // If they were redirected from a page, send them back. Otherwise, go to teams page.
+            window.location.href = redirectUrl || '/teams.html'; 
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userData = {
+            email: e.target.email.value,
+            username: e.target.username.value,
+            password: e.target.password.value
+        };
+        try {
+            const response = await fetch('/create_user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.detail || 'Signup failed');
+            }
+            alert('Signup successful! Please log in.');
+            showLogin.click();
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+});
+</script>
+</body>
+</html>

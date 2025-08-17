@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex - Pokémon Team Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3B4CCA;
+            --primary-gradient: linear-gradient(135deg, #3B4CCA 0%, #5A6EF0 100%);
+            --secondary-color: #FFDE00;
+            --light-color: #f8fafc;
+            --font-family: 'Nunito', sans-serif;
+            --cartoon-font: 'Fredoka One', cursive;
+            --card-shadow: 0 10px 25px rgba(59, 76, 202, 0.1);
+            --border-radius: 20px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background: linear-gradient(135deg, var(--light-color) 0%, #e2e8f0 100%); }
+        .container { max-width: 1200px; margin: auto; padding: 0 20px; }
+        .navbar { background: var(--primary-gradient); color: #fff; padding: 1rem 0; position: sticky; top: 0; z-index: 1000; box-shadow: var(--card-shadow); }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .navbar .logo { font-family: var(--cartoon-font); font-size: 2rem; color: var(--secondary-color); text-shadow: 3px 3px 6px rgba(0,0,0,0.3); text-decoration: none; }
+        .navbar .nav-links { display: flex; align-items: center; gap: 10px; }
+        .navbar .nav-links a { color: #fff; padding: 10px 20px; text-decoration: none; font-weight: 700; background: rgba(255,255,255,0.1); border-radius: 25px; font-size: 1rem; }
+        .hamburger { display: none; cursor: pointer; }
+        .hamburger .bar { display: block; width: 25px; height: 3px; margin: 5px auto; transition: all 0.3s ease-in-out; background-color: white; }
+        main { padding: 40px 0; }
+        .page-header { text-align: center; margin-bottom: 40px; }
+        .page-header h2 { font-family: var(--cartoon-font); font-size: 3rem; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; }
+        .search-bar { width: 100%; max-width: 500px; padding: 15px 25px; border-radius: 30px; border: 3px solid rgba(59, 76, 202, 0.2); margin-top: 20px; font-size: 1.1rem; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .card { background: rgba(255,255,255,0.9); border-radius: var(--border-radius); box-shadow: var(--card-shadow); overflow: hidden; }
+        .card-header { padding: 25px; text-align: center; background: linear-gradient(135deg, rgba(59, 76, 202, 0.1) 0%, rgba(255, 222, 0, 0.1) 100%); }
+        .card-header h3 { margin: 0 0 15px 0; font-size: 1.6rem; font-weight: 900; }
+        .card-body { padding: 0 25px 25px; }
+        .card p { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .pokemon-type { display: inline-block; padding: 6px 15px; border-radius: 20px; color: #fff; margin: 5px; text-transform: capitalize; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        
+        @media (max-width: 768px) {
+            .navbar .nav-links { position: fixed; left: -100%; top: 70px; gap: 0; flex-direction: column; background-color: var(--primary-color); width: 100%; text-align: center; transition: 0.3s; padding-bottom: 20px; box-shadow: 0 10px 10px rgba(0,0,0,0.1); }
+            .navbar .nav-links.active { left: 0; }
+            .navbar .nav-links a { margin: 16px 0; }
+            .hamburger { display: block; }
+            .hamburger.active .bar:nth-child(2) { opacity: 0; }
+            .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+            .grid-container { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+            .page-header h2 { font-size: 2.5rem; }
+        }
+        @media (max-width: 480px) {
+            .navbar .logo { font-size: 1.8rem; }
+            .grid-container { grid-template-columns: 1fr; }
+            .page-header h2 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">PokéBuilder</a>
+             <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+            <div class="nav-links">
+                <a href="/pokedex.html">Pokédex</a>
+                <a href="/teams.html" id="nav-teams">My Teams</a>
+                <a href="/auth.html" id="auth-btn">Login / Signup</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section id="pokedex-page">
+            <div class="page-header">
+                <h2>The Pokédex</h2>
+                <input type="text" id="pokedex-search" class="search-bar" placeholder="Search for a Pokémon...">
+            </div>
+            <div id="pokedex-grid" class="grid-container"></div>
+        </section>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navLinks.classList.toggle('active');
+    });
+
+    const authToken = localStorage.getItem('pokemonToken');
+    const authBtn = document.getElementById('auth-btn');
+    const pokedexGrid = document.getElementById('pokedex-grid');
+    const pokedexSearch = document.getElementById('pokedex-search');
+    let allPokemons = [];
+
+    const apiFetch = async (endpoint, options = {}) => {
+        const response = await fetch(endpoint, options);
+        if (!response.ok) {
+            console.error("API fetch failed:", response.status, response.statusText);
+            pokedexGrid.innerHTML = `<p style="text-align: center; color: red;">Error: Could not load Pokédex data. Please ensure the API server is running and accessible.</p>`;
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    };
+
+    const getTypeColor = (type) => {
+        const colors = {
+            grass: '#78C850', poison: '#A040A0', fire: '#F08030', flying: '#A890F0',
+            water: '#6890F0', bug: '#A8B820', normal: '#A8A878', electric: '#F8D030',
+            ground: '#E0C068', fairy: '#EE99AC', fighting: '#C03028', psychic: '#F85888',
+            rock: '#B8A038', steel: '#B8B8D0', ice: '#98D8D8', ghost: '#705898', dragon: '#7038F8',
+            dark: '#705848', shadow: '#493963'
+        };
+        return type ? colors[type.toLowerCase()] || '#68A090' : '#68A090';
+    };
+
+    const renderPokedex = (pokemons) => {
+        if (!pokemons || pokemons.length === 0) {
+            pokedexGrid.innerHTML = `<p style="text-align: center;">No Pokémon found.</p>`;
+            return;
+        }
+        pokedexGrid.innerHTML = pokemons.map(p => `
+            <div class="card">
+                <div class="card-header">
+                    <h3>#${p.id} ${p.name}</h3>
+                    <div>
+                        <span class="pokemon-type" style="background-color: ${getTypeColor(p.type1)};">${p.type1}</span>
+                        ${p.type2 ? `<span class="pokemon-type" style="background-color: ${getTypeColor(p.type2)};">${p.type2}</span>` : ''}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p><strong>HP:</strong> <span>${p.HP}</span></p>
+                    <p><strong>Attack:</strong> <span>${p.Attack}</span></p>
+                    <p><strong>Defense:</strong> <span>${p.Defense}</span></p>
+                </div>
+            </div>
+        `).join('');
+    };
+
+    const init = async () => {
+        if (authToken) {
+            authBtn.textContent = 'Logout';
+            authBtn.href = "#";
+            authBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('pokemonToken');
+                window.location.href = '/auth.html';
+            });
+        }
+        try {
+            pokedexGrid.innerHTML = `<p style="text-align: center;">Loading Pokédex...</p>`;
+            allPokemons = await apiFetch('/pokemon/');
+            renderPokedex(allPokemons);
+        } catch (error) {
+            console.error("Could not fetch Pokémon:", error);
+        }
+    };
+
+    pokedexSearch.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredPokemons = allPokemons.filter(p => p.name.toLowerCase().includes(searchTerm));
+        renderPokedex(filteredPokemons);
+    });
+
+    init();
+});
+</script>
+</body>
+</html>

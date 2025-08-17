@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Team Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3B4CCA;
+            --primary-gradient: linear-gradient(135deg, #3B4CCA 0%, #5A6EF0 100%);
+            --secondary-color: #FFDE00;
+            --accent-color: #CC0000;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --font-family: 'Nunito', sans-serif;
+            --cartoon-font: 'Fredoka One', cursive;
+            --card-shadow: 0 10px 25px rgba(59, 76, 202, 0.1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, var(--light-color) 0%, #e2e8f0 100%);
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: auto; padding: 0 20px; }
+        .navbar {
+            background: var(--primary-gradient);
+            color: #fff;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--card-shadow);
+        }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .navbar .logo {
+            font-family: var(--cartoon-font);
+            font-size: 2rem;
+            color: var(--secondary-color);
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            text-decoration: none;
+        }
+        .navbar .nav-links { display: flex; align-items: center; gap: 10px; }
+        .navbar .nav-links a {
+            color: #fff;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-weight: 700;
+            background: rgba(255,255,255,0.1);
+            border-radius: 25px;
+            font-size: 1rem;
+        }
+        .hamburger {
+            display: none;
+            cursor: pointer;
+        }
+        .hamburger .bar {
+            display: block;
+            width: 25px;
+            height: 3px;
+            margin: 5px auto;
+            -webkit-transition: all 0.3s ease-in-out;
+            transition: all 0.3s ease-in-out;
+            background-color: white;
+        }
+        main { padding: 40px 0; }
+        #landing-page {
+            text-align: center;
+            padding: 100px 20px;
+        }
+        #landing-page h1 {
+            font-family: var(--cartoon-font);
+            font-size: 4rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+        #landing-page p {
+            font-size: 1.8rem;
+            margin-top: 20px;
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+        .catchphrase {
+            font-family: var(--cartoon-font);
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin: 30px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        #start-building-btn {
+            background: var(--accent-color);
+            color: #fff;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            padding: 15px 30px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+        }
+        /* --- Responsive Styles --- */
+        @media (max-width: 768px) {
+            .navbar .nav-links {
+                position: fixed;
+                left: -100%;
+                top: 70px;
+                gap: 0;
+                flex-direction: column;
+                background-color: var(--primary-color);
+                width: 100%;
+                text-align: center;
+                transition: 0.3s;
+                padding-bottom: 20px;
+            }
+            .navbar .nav-links.active {
+                left: 0;
+            }
+            .navbar .nav-links a {
+                margin: 16px 0;
+            }
+            .hamburger {
+                display: block;
+            }
+            .hamburger.active .bar:nth-child(2) {
+                opacity: 0;
+            }
+            .hamburger.active .bar:nth-child(1) {
+                transform: translateY(8px) rotate(45deg);
+            }
+            .hamburger.active .bar:nth-child(3) {
+                transform: translateY(-8px) rotate(-45deg);
+            }
+            #landing-page h1 { font-size: 3rem; }
+            #landing-page p { font-size: 1.5rem; }
+            .catchphrase { font-size: 2rem; }
+        }
+        @media (max-width: 480px) {
+            #landing-page h1 { font-size: 2.5rem; }
+            #landing-page p { font-size: 1.2rem; }
+            .catchphrase { font-size: 1.8rem; }
+            .navbar .logo { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">PokéBuilder</a>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+            <div class="nav-links">
+                <a href="/pokedex.html">Pokédex</a>
+                <a href="/teams.html" id="nav-teams">My Teams</a>
+                <a href="/auth.html" id="auth-btn">Login / Signup</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section id="landing-page">
+            <h1>Welcome, Pokémon Trainer!</h1>
+            <div class="catchphrase">Gotta Catch 'Em All!</div>
+            <p>Build your ultimate team and prepare for battle.</p>
+            <a href="/teams.html"><button id="start-building-btn">Start Building Your Team</button></a>
+        </section>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const authToken = localStorage.getItem('pokemonToken');
+    const authBtn = document.getElementById('auth-btn');
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navLinks.classList.toggle('active');
+    });
+
+    document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navLinks.classList.remove('active');
+    }));
+
+    if (authToken) {
+        authBtn.textContent = 'Logout';
+        authBtn.href = "#"; // Prevent navigation
+        authBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('pokemonToken');
+            window.location.href = '/auth.html'; // Redirect to login after logout
+        });
+    } else {
+        authBtn.textContent = 'Login / Signup';
+        authBtn.href = '/auth.html';
+    }
+});
+</script>
+</body>
+</html>
