@@ -803,7 +803,8 @@
                 <input type="text" id="pokedex-search" class="search-bar" placeholder="Search for a Pokémon...">
             </div>
             <div id="pokedex-grid" class="grid-container">
-                </div>
+                <!-- Pokémon cards will be injected here -->
+            </div>
         </section>
 
         <section id="teams-page" class="page">
@@ -812,10 +813,12 @@
                 <button id="create-team-btn">Create New Team</button>
             </div>
             <div id="teams-grid" class="grid-container">
-                </div>
+                <!-- Team cards will be injected here -->
+            </div>
         </section>
     </main>
 
+    <!-- Authentication Modal -->
     <div id="auth-modal" class="modal">
         <div class="modal-content">
             <button class="modal-close">&times;</button>
@@ -837,6 +840,7 @@
         </div>
     </div>
 
+    <!-- Team Creation/Edit Modal -->
     <div id="team-modal" class="modal">
         <div class="modal-content">
             <button class="modal-close">&times;</button>
@@ -850,16 +854,19 @@
                         <div class="selector-controls">
                             <input type="text" id="selector-search" class="search-bar" placeholder="Search Pokémon...">
                             <div id="selector-type-filters" class="type-filters">
-                                </div>
+                                <!-- Type filter buttons will be injected here -->
+                            </div>
                         </div>
                         <div id="team-pokemon-selector-grid">
-                            </div>
+                            <!-- Selectable Pokémon cards will be injected here -->
+                        </div>
                     </div>
 
                     <div class="team-preview-panel">
                         <h3>Team Preview</h3>
                         <div id="team-preview-slots" class="team-preview-slots">
-                            </div>
+                            <!-- 6 preview slots will be generated here -->
+                        </div>
                     </div>
                 </div>
 
@@ -874,7 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- GLOBAL STATE & CONFIG ---
     const API_BASE_URL = ''; // Use relative path
-    let authToken = null;
+    let authToken = localStorage.getItem('pokemonToken'); // Load token on start
     let allPokemons = [];
     let selectedPokemonForTeam = [];
 
@@ -927,7 +934,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateUIForAuthState = () => {
         if (authToken) {
             authBtn.textContent = 'Logout';
-            navTeams.style.display = 'inline-block';
+            navTeams.style.display = 'flex';
         } else {
             authBtn.textContent = 'Login / Signup';
             navTeams.style.display = 'none';
@@ -955,6 +962,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const renderTeams = (teams) => {
+        if (teams.length === 0) {
+            teamsGrid.innerHTML = `<p style="text-align: center; font-size: 1.2rem;">You haven't created any teams yet!</p>`;
+            return;
+        }
         teamsGrid.innerHTML = teams.map(team => `
             <div class="card team-card" data-team-id="${team.id}">
                 <div class="card-header">
@@ -980,11 +991,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const init = async () => {
         updateUIForAuthState();
         try {
-            // Using Promise.all to fetch data more efficiently
-            const [pokemonData] = await Promise.all([
-                apiFetch('/pokemon')
-            ]);
-            allPokemons = pokemonData;
+            allPokemons = await apiFetch('/pokemon/');
             renderPokedex(allPokemons);
             populateTypeFilters();
         } catch (error) {
@@ -1000,7 +1007,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         if (!authToken) return;
         try {
-            const teams = await apiFetch('/teams');
+            const teams = await apiFetch('/teams/');
             renderTeams(teams);
             showPage('teams-page');
         } catch (error) { console.error('Failed to fetch teams:', error); }
@@ -1008,6 +1015,7 @@ document.addEventListener('DOMContentLoaded', () => {
     authBtn.addEventListener('click', () => {
         if (authToken) {
             authToken = null;
+            localStorage.removeItem('pokemonToken'); // Clear from localStorage
             updateUIForAuthState();
         } else {
             loginForm.style.display = 'block';
@@ -1017,6 +1025,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('show-signup').addEventListener('click', () => { loginForm.style.display = 'none'; signupForm.style.display = 'block'; });
     document.getElementById('show-login').addEventListener('click', () => { signupForm.style.display = 'none'; loginForm.style.display = 'block'; });
+    
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new URLSearchParams();
@@ -1030,10 +1039,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const data = await response.json();
             authToken = data.access_token;
+            localStorage.setItem('pokemonToken', authToken); // Save to localStorage
             updateUIForAuthState();
             authModal.classList.remove('active');
         } catch (error) { alert(error.message); }
     });
+
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const userData = { email: e.target.email.value, username: e.target.username.value, password: e.target.password.value };
@@ -1043,6 +1054,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('show-login').click();
         } catch (error) { console.error('Signup failed:', error); }
     });
+
     pokedexSearch.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
         const filteredPokemons = allPokemons.filter(p => p.name.toLowerCase().includes(searchTerm));
@@ -1050,7 +1062,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- TEAM MANAGEMENT LOGIC ---
-
     const openTeamModal = (team = null) => {
         teamForm.reset();
         selectorSearch.value = '';
@@ -1067,7 +1078,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const applySelectorFilters = () => {
         const searchTerm = selectorSearch.value.toLowerCase();
-        const activeTypeFilter = document.querySelector('.type-filters button.active');
+        const activeTypeFilter = document.querySelector('#selector-type-filters button.active');
         const type = activeTypeFilter ? activeTypeFilter.dataset.type : null;
 
         const filteredPokemons = allPokemons.filter(p => {
@@ -1108,12 +1119,10 @@ document.addEventListener('DOMContentLoaded', () => {
     selectorSearch.addEventListener('input', applySelectorFilters);
     selectorTypeFilters.addEventListener('click', (e) => {
         if (e.target.tagName === 'BUTTON') {
-            const currentActive = document.querySelector('.type-filters button.active');
+            const currentActive = document.querySelector('#selector-type-filters button.active');
             if (currentActive) {
                 currentActive.classList.remove('active');
             }
-            // If the clicked button was not the one that was active, make it active.
-            // This allows toggling the filter off.
             if (currentActive !== e.target) {
                  e.target.classList.add('active');
             }
@@ -1128,10 +1137,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const pokemonId = parseInt(card.dataset.pokemonId);
         const index = selectedPokemonForTeam.indexOf(pokemonId);
 
-        if (index > -1) { // Pokemon is already selected, so deselect it
+        if (index > -1) {
             selectedPokemonForTeam.splice(index, 1);
             card.classList.remove('selected');
-        } else { // Pokemon is not selected, so select it
+        } else {
             if (selectedPokemonForTeam.length >= 6) {
                 alert('A team can have a maximum of 6 Pokémon.');
                 return;
@@ -1146,14 +1155,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const teamCard = e.target.closest('.team-card');
         if (!teamCard) return;
 
-        // Expand/collapse team view if not clicking a button
         if (!e.target.closest('button')) {
             teamCard.querySelector('.team-pokemons-list').classList.toggle('expanded');
         }
 
         if (e.target.classList.contains('edit-team-btn')) {
             const teamId = e.target.dataset.teamId;
-            const teams = await apiFetch('/teams');
+            const teams = await apiFetch('/teams/');
             const team = teams.find(t => t.id == teamId);
             openTeamModal(team);
         }
@@ -1163,7 +1171,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const teamId = e.target.dataset.teamId;
             try {
                 await apiFetch(`/teams/${teamId}`, { method: 'DELETE' });
-                navTeams.click(); // Refresh team list
+                navTeams.click();
             } catch (error) { console.error('Failed to delete team:', error); }
         }
     });
@@ -1180,10 +1188,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (teamId) {
                 await apiFetch(`/teams/${teamId}`, { method: 'PUT', body: JSON.stringify(teamData) });
             } else {
-                await apiFetch('/teams', { method: 'POST', body: JSON.stringify(teamData) });
+                await apiFetch('/teams/', { method: 'POST', body: JSON.stringify(teamData) });
             }
             teamModal.classList.remove('active');
-            navTeams.click(); // Refresh team list
+            navTeams.click();
         } catch (error) { console.error('Failed to save team:', error); }
     });
 
@@ -1208,7 +1216,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rock: '#B8A038', steel: '#B8B8D0', ice: '#98D8D8', ghost: '#705898', dragon: '#7038F8',
             dark: '#705848', shadow: '#493963'
         };
-        return colors[type.toLowerCase()] || '#68A090'; // Default color
+        return type ? colors[type.toLowerCase()] || '#68A090' : '#68A090';
     };
 
     // --- LET'S GO! ---
