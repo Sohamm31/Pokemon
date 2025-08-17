@@ -382,7 +382,7 @@
             backdrop-filter: blur(5px);
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 10px;
         }
 
         .modal.active {
@@ -398,14 +398,17 @@
         .modal-content {
             background: rgba(255,255,255,0.95);
             backdrop-filter: blur(20px);
-            padding: 30px;
+            padding: 20px;
             border-radius: var(--border-radius);
-            width: 95%;
+            width: 100%;
             max-width: 500px;
             position: relative;
             box-shadow: var(--hover-shadow);
             border: 1px solid rgba(255,255,255,0.2);
             animation: modalSlideUp 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
         }
 
         @keyframes modalSlideUp {
@@ -415,15 +418,15 @@
 
         .modal-close {
             position: absolute;
-            top: 15px; 
-            right: 15px;
-            font-size: 2rem;
+            top: 10px; 
+            right: 10px;
+            font-size: 1.5rem;
             cursor: pointer;
             border: none;
             background: rgba(204, 0, 0, 0.1);
             color: var(--accent-color);
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -440,18 +443,26 @@
 
         .modal-content h2 {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             font-family: var(--cartoon-font);
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: var(--primary-color);
+            flex-shrink: 0;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden;
         }
 
         .modal-form input[type="text"],
         .modal-form input[type="email"],
         .modal-form input[type="password"] {
             width: 100%;
-            padding: 15px 20px;
-            margin-bottom: 20px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
             border: 2px solid rgba(59, 76, 202, 0.2);
             border-radius: 15px;
             font-size: 1rem;
@@ -471,14 +482,15 @@
             width: 100%;
             background: var(--primary-gradient);
             color: #fff;
-            margin-top: 20px;
+            margin-top: 15px;
             padding: 15px;
             font-size: 1.1rem;
+            flex-shrink: 0; /* Prevents button from shrinking */
         }
 
         .form-toggle {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
         .form-toggle a {
@@ -496,27 +508,28 @@
         /* --- New Team Modal Styles --- */
         #team-modal .modal-content {
             max-width: 95vw;
-            max-height: 90vh;
-            overflow-y: auto;
         }
 
         .team-builder-layout {
             display: flex;
-            gap: 25px;
-            margin-top: 20px;
+            gap: 20px;
+            margin-top: 15px;
+            flex-grow: 1;
+            overflow: hidden; /* Important for child scrolling */
         }
 
         .pokemon-selection-panel {
             flex: 2;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .team-preview-panel {
             flex: 1;
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
             border-radius: 15px;
-            padding: 20px;
+            padding: 15px;
             border: 1px solid rgba(59, 76, 202, 0.1);
         }
 
@@ -525,17 +538,19 @@
             color: var(--primary-color);
             margin-bottom: 15px;
             text-align: center;
+            font-size: 1.2rem;
         }
 
         .selector-controls {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
         }
 
         .type-filters {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         .type-filters button {
@@ -561,13 +576,13 @@
         #team-pokemon-selector-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-            overflow-y: auto;
-            max-height: 400px;
+            gap: 10px;
+            overflow-y: auto; /* This will scroll */
             padding: 15px;
             background: rgba(248, 250, 252, 0.5);
             border-radius: 15px;
             border: 1px solid rgba(59, 76, 202, 0.1);
+            flex-grow: 1;
         }
 
         .selector-card {
@@ -603,7 +618,7 @@
         .team-preview-slots {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 10px;
         }
 
         .preview-slot {
@@ -686,11 +701,9 @@
             
             .team-builder-layout { 
                 flex-direction: column;
-                gap: 20px;
             }
             
             #team-pokemon-selector-grid { 
-                max-height: 250px;
                 grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
                 gap: 10px;
             }
@@ -703,26 +716,6 @@
             .preview-slot {
                 height: 70px;
                 font-size: 0.8rem;
-            }
-            
-            .modal-content {
-                margin: 10px;
-                padding: 20px;
-                max-height: 85vh;
-            }
-            
-            #team-modal .modal-content {
-                max-width: 95vw;
-                width: 95vw;
-            }
-            
-            .modal-form button[type="submit"] {
-                position: sticky;
-                bottom: 0;
-                z-index: 10;
-                margin-top: 20px;
-                border-radius: 15px;
-                box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
             }
             
             .selector-card {
@@ -793,7 +786,6 @@
 
         <section id="landing-page" class="page active">
             <h1>Welcome, Pokémon Trainer!</h1>
-            <div class="catchphrase">Gotta Catch 'Em All!</div>
             <p>Build your ultimate team and prepare for battle.</p>
         </section>
 
@@ -881,7 +873,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- GLOBAL STATE & CONFIG ---
     const API_BASE_URL = ''; // Use relative path
-    let authToken = localStorage.getItem('pokemonToken'); // Load token on start
+    let authToken = localStorage.getItem('pokemonToken');
     let allPokemons = [];
     let selectedPokemonForTeam = [];
 
