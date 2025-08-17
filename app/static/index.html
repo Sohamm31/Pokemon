@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Team Builder</title>
+    <title>Pokédex</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
@@ -178,9 +178,9 @@
         .catchphrase {
             font-family: var(--cartoon-font);
             font-size: 2.5rem;
-            color: var(--accent-color);
+            color: var(--secondary-color);
             margin: 30px 0;
-            text-shadow: 2px 2px 4px rgba(204, 0, 0, 0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
             animation: bounce 2s ease-in-out infinite;
         }
 
@@ -531,6 +531,7 @@
             border-radius: 15px;
             padding: 15px;
             border: 1px solid rgba(59, 76, 202, 0.1);
+            transition: var(--transition);
         }
 
         .team-preview-panel h3 {
@@ -652,7 +653,7 @@
         }
 
         /* --- Create Team Button --- */
-        #create-team-btn {
+        #create-team-btn, #start-building-btn {
             background: var(--accent-color);
             background: linear-gradient(135deg, var(--accent-color) 0%, #dc2626 100%);
             color: #fff;
@@ -662,10 +663,20 @@
             box-shadow: 0 8px 20px rgba(204, 0, 0, 0.3);
         }
 
-        #create-team-btn:hover {
+        #create-team-btn:hover, #start-building-btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 12px 30px rgba(204, 0, 0, 0.4);
         }
+
+        #preview-toggle-btn {
+            display: none; /* Hidden by default */
+            width: fit-content;
+            margin: 0 auto 15px;
+            background: var(--secondary-color);
+            color: var(--dark-color);
+            font-weight: 900;
+        }
+
 
         /* --- Responsive Design --- */
         @media (max-width: 768px) {
@@ -725,6 +736,14 @@
             .selector-card span {
                 font-size: 0.9rem;
             }
+
+            #preview-toggle-btn {
+                display: block; /* Show on mobile */
+            }
+
+            .team-preview-panel.hidden-mobile {
+                display: none;
+            }
         }
 
         @media (max-width: 480px) {
@@ -776,7 +795,7 @@
             <div class="logo">PokéBuilder</div>
             <div class="nav-links">
                 <a href="#pokedex" id="nav-pokedex">Pokédex</a>
-                <a href="#teams" id="nav-teams" style="display:none;">My Teams</a>
+                <a href="#teams" id="nav-teams">My Teams</a>
                 <button id="auth-btn">Login / Signup</button>
             </div>
         </div>
@@ -786,7 +805,9 @@
 
         <section id="landing-page" class="page active">
             <h1>Welcome, Pokémon Trainer!</h1>
+            <div class="catchphrase">Gotta Catch 'Em All!</div>
             <p>Build your ultimate team and prepare for battle.</p>
+            <button id="start-building-btn">Start Building Your Team</button>
         </section>
 
         <section id="pokedex-page" class="page">
@@ -840,6 +861,8 @@
                 <h2 id="team-modal-title">Create Team</h2>
                 <input type="hidden" id="team-id-input">
                 <input type="text" id="team-name-input" placeholder="Team Name" required>
+                
+                <button type="button" id="preview-toggle-btn">Hide Preview</button>
 
                 <div class="team-builder-layout">
                     <div class="pokemon-selection-panel">
@@ -883,6 +906,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const navTeams = document.getElementById('nav-teams');
     const authBtn = document.getElementById('auth-btn');
     const logo = document.querySelector('.logo');
+    const startBuildingBtn = document.getElementById('start-building-btn');
     const pokedexGrid = document.getElementById('pokedex-grid');
     const pokedexSearch = document.getElementById('pokedex-search');
     const teamsGrid = document.getElementById('teams-grid');
@@ -900,6 +924,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectorSearch = document.getElementById('selector-search');
     const selectorTypeFilters = document.getElementById('selector-type-filters');
     const teamPreviewSlots = document.getElementById('team-preview-slots');
+    const previewToggleBtn = document.getElementById('preview-toggle-btn');
+    const teamPreviewPanel = document.querySelector('.team-preview-panel');
 
 
     // --- API HELPER FUNCTIONS ---
@@ -926,10 +952,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateUIForAuthState = () => {
         if (authToken) {
             authBtn.textContent = 'Logout';
-            navTeams.style.display = 'flex';
         } else {
             authBtn.textContent = 'Login / Signup';
-            navTeams.style.display = 'none';
             showPage('landing-page');
         }
     };
@@ -955,7 +979,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const renderTeams = (teams) => {
         if (teams.length === 0) {
-            teamsGrid.innerHTML = `<p style="text-align: center; font-size: 1.2rem;">You haven't created any teams yet!</p>`;
+            teamsGrid.innerHTML = `<p style="text-align: center; font-size: 1.2rem;">You haven't created any teams yet! Click "Create New Team" to start.</p>`;
             return;
         }
         teamsGrid.innerHTML = teams.map(team => `
@@ -995,19 +1019,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Navigation and Auth
     logo.addEventListener('click', () => showPage('landing-page'));
     navPokedex.addEventListener('click', (e) => { e.preventDefault(); showPage('pokedex-page'); });
-    navTeams.addEventListener('click', async (e) => {
+    
+    const handleTeamsNavigation = async (e) => {
         e.preventDefault();
-        if (!authToken) return;
-        try {
-            const teams = await apiFetch('/teams/');
-            renderTeams(teams);
-            showPage('teams-page');
-        } catch (error) { console.error('Failed to fetch teams:', error); }
-    });
+        if (authToken) {
+            try {
+                const teams = await apiFetch('/teams/');
+                renderTeams(teams);
+                showPage('teams-page');
+            } catch (error) { console.error('Failed to fetch teams:', error); }
+        } else {
+            loginForm.style.display = 'block';
+            signupForm.style.display = 'none';
+            authModal.classList.add('active');
+        }
+    };
+
+    navTeams.addEventListener('click', handleTeamsNavigation);
+    startBuildingBtn.addEventListener('click', handleTeamsNavigation);
+
     authBtn.addEventListener('click', () => {
         if (authToken) {
             authToken = null;
-            localStorage.removeItem('pokemonToken'); // Clear from localStorage
+            localStorage.removeItem('pokemonToken');
             updateUIForAuthState();
         } else {
             loginForm.style.display = 'block';
@@ -1031,9 +1065,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const data = await response.json();
             authToken = data.access_token;
-            localStorage.setItem('pokemonToken', authToken); // Save to localStorage
+            localStorage.setItem('pokemonToken', authToken);
             updateUIForAuthState();
             authModal.classList.remove('active');
+            navTeams.click(); // Go to teams page after successful login
         } catch (error) { alert(error.message); }
     });
 
@@ -1062,6 +1097,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('team-name-input').value = team ? team.name : '';
         
         selectedPokemonForTeam = team ? team.pokemons.map(p => p.id) : [];
+        
+        // Reset preview visibility for mobile
+        teamPreviewPanel.classList.remove('hidden-mobile');
+        previewToggleBtn.textContent = 'Hide Preview';
 
         applySelectorFilters();
         updateTeamPreview();
@@ -1119,6 +1158,15 @@ document.addEventListener('DOMContentLoaded', () => {
                  e.target.classList.add('active');
             }
             applySelectorFilters();
+        }
+    });
+
+    previewToggleBtn.addEventListener('click', () => {
+        teamPreviewPanel.classList.toggle('hidden-mobile');
+        if (teamPreviewPanel.classList.contains('hidden-mobile')) {
+            previewToggleBtn.textContent = 'Show Preview';
+        } else {
+            previewToggleBtn.textContent = 'Hide Preview';
         }
     });
 
@@ -1196,6 +1244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- UTILITY FUNCTIONS ---
     const populateTypeFilters = () => {
+        if (!allPokemons || allPokemons.length === 0) return;
         const types = [...new Set(allPokemons.flatMap(p => [p.type1, p.type2]).filter(Boolean))].sort();
         selectorTypeFilters.innerHTML = types.map(type => `<button data-type="${type.toLowerCase()}">${type}</button>`).join('');
     };
