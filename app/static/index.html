@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokédex</title>
+    <title>Pokémon Team Builder</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
@@ -1017,8 +1017,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Navigation and Auth
-    logo.addEventListener('click', () => showPage('landing-page'));
-    navPokedex.addEventListener('click', (e) => { e.preventDefault(); showPage('pokedex-page'); });
+    logo.addEventListener('click', (e) => { 
+        e.preventDefault();
+        showPage('landing-page');
+    });
+    navPokedex.addEventListener('click', (e) => { 
+        e.preventDefault(); 
+        showPage('pokedex-page'); 
+    });
     
     const handleTeamsNavigation = async (e) => {
         e.preventDefault();
