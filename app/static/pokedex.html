@@ -33,9 +33,11 @@
         .page-header h2 { font-family: var(--cartoon-font); font-size: 3rem; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; }
         .search-bar { width: 100%; max-width: 500px; padding: 15px 25px; border-radius: 30px; border: 3px solid rgba(59, 76, 202, 0.2); margin-top: 20px; font-size: 1.1rem; }
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
-        .card { background: rgba(255,255,255,0.9); border-radius: var(--border-radius); box-shadow: var(--card-shadow); overflow: hidden; }
-        .card-header { padding: 25px; text-align: center; background: linear-gradient(135deg, rgba(59, 76, 202, 0.1) 0%, rgba(255, 222, 0, 0.1) 100%); }
-        .card-header h3 { margin: 0 0 15px 0; font-size: 1.6rem; font-weight: 900; }
+        .card { background: rgba(255,255,255,0.9); border-radius: var(--border-radius); box-shadow: var(--card-shadow); overflow: hidden; text-align: center; }
+        .card-sprite { background: linear-gradient(135deg, rgba(59, 76, 202, 0.1) 0%, rgba(255, 222, 0, 0.1) 100%); padding: 20px; height: 160px; display:flex; justify-content: center; align-items: center;}
+        .card-sprite img { width: 120px; height: 120px; image-rendering: pixelated; }
+        .card-header { padding: 20px; }
+        .card-header h3 { margin: 0 0 15px 0; font-size: 1.6rem; font-weight: 900; text-transform: capitalize; }
         .card-body { padding: 0 25px 25px; }
         .card p { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
         .pokemon-type { display: inline-block; padding: 6px 15px; border-radius: 20px; color: #fff; margin: 5px; text-transform: capitalize; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
@@ -83,7 +85,8 @@
                 <h2>The Pokédex</h2>
                 <input type="text" id="pokedex-search" class="search-bar" placeholder="Search for a Pokémon...">
             </div>
-            <div id="pokedex-grid" class="grid-container"></div>
+            <div id="pokedex-grid" class="grid-container">
+                </div>
         </section>
     </main>
 
@@ -101,13 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const authBtn = document.getElementById('auth-btn');
     const pokedexGrid = document.getElementById('pokedex-grid');
     const pokedexSearch = document.getElementById('pokedex-search');
-    let allPokemons = [];
+    let standardPokemons = []; // This will hold the final, clean list with new IDs
 
     const apiFetch = async (endpoint, options = {}) => {
         const response = await fetch(endpoint, options);
         if (!response.ok) {
-            console.error("API fetch failed:", response.status, response.statusText);
-            pokedexGrid.innerHTML = `<p style="text-align: center; color: red;">Error: Could not load Pokédex data. Please ensure the API server is running and accessible.</p>`;
+            pokedexGrid.innerHTML = `<p style="text-align: center; color: red;">Error: Could not load Pokédex data.</p>`;
             throw new Error('Network response was not ok');
         }
         return response.json();
@@ -124,6 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return type ? colors[type.toLowerCase()] || '#68A090' : '#68A090';
     };
 
+    // The getSpriteUrl function is now very simple because we will pass it a Pokémon with the correct re-assigned ID
+    const getSpriteUrl = (pokemon) => {
+        return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`;
+    };
+
     const renderPokedex = (pokemons) => {
         if (!pokemons || pokemons.length === 0) {
             pokedexGrid.innerHTML = `<p style="text-align: center;">No Pokémon found.</p>`;
@@ -131,6 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         pokedexGrid.innerHTML = pokemons.map(p => `
             <div class="card">
+                <div class="card-sprite">
+                    <img src="${getSpriteUrl(p)}" alt="${p.name}">
+                </div>
                 <div class="card-header">
                     <h3>#${p.id} ${p.name}</h3>
                     <div>
@@ -156,11 +166,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.removeItem('pokemonToken');
                 window.location.href = '/auth.html';
             });
+        } else {
+             authBtn.textContent = 'Login / Signup';
+             authBtn.href = '/auth.html';
         }
+
         try {
             pokedexGrid.innerHTML = `<p style="text-align: center;">Loading Pokédex...</p>`;
-            allPokemons = await apiFetch('/pokemon/');
-            renderPokedex(allPokemons);
+            const allPokemonData = await apiFetch('/pokemon/');
+            
+            // --- IMPLEMENTING YOUR LOGIC ---
+            // 1. Filter out Mega Pokémon
+            const filteredData = allPokemonData.filter(p => p.name && !p.name.toLowerCase().includes('mega'));
+            
+            // 2. Re-assign IDs sequentially
+            standardPokemons = filteredData.map((pokemon, index) => ({
+                ...pokemon, // Copy all original data (name, stats, etc.)
+                id: index + 1 // Overwrite the ID with the new sequential one
+            }));
+            
+            // 3. Render the newly created list
+            renderPokedex(standardPokemons);
+
         } catch (error) {
             console.error("Could not fetch Pokémon:", error);
         }
@@ -168,7 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     pokedexSearch.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
-        const filteredPokemons = allPokemons.filter(p => p.name.toLowerCase().includes(searchTerm));
+        // The search now works on the clean list with re-assigned IDs
+        const filteredPokemons = standardPokemons.filter(p => p.name.toLowerCase().includes(searchTerm));
         renderPokedex(filteredPokemons);
     });
 

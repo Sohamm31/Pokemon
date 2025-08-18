@@ -36,13 +36,17 @@
         .page-header h2 { font-family: var(--cartoon-font); font-size: 3rem; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 20px; }
         #create-team-btn { background: var(--accent-color); color: #fff; font-size: 1.1rem; padding: 15px 30px; }
         .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
-        .card { background: rgba(255,255,255,0.9); border-radius: var(--border-radius); box-shadow: var(--card-shadow); overflow: hidden; cursor: pointer; }
-        .card-header { padding: 25px; text-align: center; background: linear-gradient(135deg, rgba(59, 76, 202, 0.1) 0%, rgba(255, 222, 0, 0.1) 100%); }
+        .card { background: rgba(255,255,255,0.9); border-radius: var(--border-radius); box-shadow: var(--card-shadow); overflow: hidden; transition: all 0.3s ease; cursor: pointer; }
+        .card:hover { transform: translateY(-5px); }
+        .card-header { padding: 25px; text-align: center; }
         .card-header h3 { margin: 0; font-size: 1.6rem; font-weight: 900; }
         .team-preview { display: flex; justify-content: center; gap: 8px; padding: 15px; flex-wrap: wrap; }
-        .team-preview-pokemon { width: 50px; height: 50px; background: #e2e8f0; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 0.9rem; }
+        .team-preview-pokemon { width: 50px; height: 50px; background: #e2e8f0; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        .team-preview-pokemon img { width: 100%; height: 100%; image-rendering: pixelated; }
         .team-pokemons-list { display: none; padding: 25px; background: #f8fafc; }
         .team-pokemons-list.expanded { display: block; }
+        .team-pokemons-list p { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; text-transform: capitalize; }
+        .team-pokemons-list img { width: 40px; height: 40px; image-rendering: pixelated; }
         .card-footer { display: flex; justify-content: space-around; background: #f1f5f9; padding: 15px; gap: 10px; cursor: default; }
         .card-footer button { flex: 1; background: var(--primary-gradient); color: #fff; border-radius: 15px; }
         .card-footer button.delete { background: var(--accent-color); }
@@ -59,18 +63,19 @@
         .team-preview-panel { flex: 1; background: #f8fafc; border-radius: 15px; padding: 15px; }
         .team-preview-panel h3 { font-family: var(--cartoon-font); color: var(--primary-color); margin-bottom: 15px; text-align: center; font-size: 1.2rem; }
         .selector-controls { margin-bottom: 15px; flex-shrink: 0; }
-        .selector-controls .search-bar { width: 100%; padding: 12px 15px; font-size: 1rem; border-radius: 15px; margin: 0; border: 2px solid #ccc; }
+        .selector-controls .search-bar { width: 100%; padding: 12px 15px; font-size: 1rem; border-radius: 15px; margin: 0; }
         .type-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .type-filters button { padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; background: #e2e8f0; }
         .type-filters button.active { background: var(--primary-gradient); color: #fff; }
         #team-pokemon-selector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; overflow-y: auto; padding: 15px; background: #f8fafc; border-radius: 15px; flex-grow: 1; }
-        .selector-card { border: 2px solid #eee; border-radius: 15px; padding: 15px; text-align: center; cursor: pointer; background: #fff; }
+        .selector-card { border: 2px solid #eee; border-radius: 15px; padding: 10px; text-align: center; cursor: pointer; background: #fff; }
         .selector-card.selected { border-color: var(--primary-color); background: #e7f0ff; }
-        .selector-card span { font-size: 1rem; font-weight: 700; }
+        .selector-card img { width: 60px; height: 60px; image-rendering: pixelated; }
+        .selector-card span { font-size: 0.9rem; font-weight: 700; display: block; margin-top: 5px; text-transform: capitalize; }
         .team-preview-slots { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .preview-slot { height: 90px; background: #fff; border: 2px dashed #ccc; border-radius: 15px; display: flex; justify-content: center; align-items: center; flex-direction: column; font-weight: 700; font-size: 0.9rem; padding: 10px; }
         .preview-slot.filled { border-style: solid; border-color: var(--primary-color); }
-        .pokemon-type { font-size: 0.7rem; padding: 3px 8px; margin-top: 5px; color: #fff; border-radius: 10px; }
+        .preview-slot img { width: 50px; height: 50px; image-rendering: pixelated; }
         #team-modal-tabs { display: none; }
         
         @media (max-width: 768px) {
@@ -87,12 +92,9 @@
             #team-modal-tabs button { width: 100%; background: #e2e8f0; color: var(--dark-color); }
             #team-modal-tabs button.active { background: var(--primary-gradient); color: #fff; }
             .team-builder-layout { flex-direction: column; }
-            .pokemon-selection-panel, .team-preview-panel {
-                display: none; /* Hide both views by default on mobile */
-            }
-            .team-builder-layout .view-active {
-                display: flex; /* Show only the active view */
-            }
+            .team-preview-panel { display: none; } 
+            .team-builder-layout.review-mode .pokemon-selection-panel { display: none; }
+            .team-builder-layout.review-mode .team-preview-panel { display: flex; flex-direction: column; }
             .team-preview-slots { grid-template-columns: 1fr 1fr 1fr; }
         }
         @media (max-width: 480px) {
@@ -187,8 +189,9 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/auth.html';
     });
 
-    let allPokemons = [];
-    let selectedPokemonForTeam = [];
+    let allPokemons = []; // The original full list from API
+    let standardPokemons = []; // The clean list with new IDs
+    let selectedPokemonForTeam = []; // Holds ORIGINAL IDs for the backend
     const teamsGrid = document.getElementById('teams-grid');
     const createTeamBtn = document.getElementById('create-team-btn');
     const teamModal = document.getElementById('team-modal');
@@ -198,7 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectorTypeFilters = document.getElementById('selector-type-filters');
     const teamPreviewSlots = document.getElementById('team-preview-slots');
     
-    // Mobile UI elements
     const tabSelect = document.getElementById('tab-select');
     const tabReview = document.getElementById('tab-review');
     const pokemonSelectionPanel = document.querySelector('.pokemon-selection-panel');
@@ -231,27 +233,39 @@ document.addEventListener('DOMContentLoaded', () => {
         return type ? colors[type.toLowerCase()] || '#68A090' : '#68A090';
     };
 
+    const getSpriteUrl = (pokemon) => {
+        // Use the re-assigned sequential ID for fetching the sprite
+        return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`;
+    };
+
     const renderTeams = (teams) => {
         if (!teams || teams.length === 0) {
             teamsGrid.innerHTML = `<p style="text-align: center; font-size: 1.2rem;">You haven't created any teams yet! Click "Create New Team" to start.</p>`;
             return;
         }
-        teamsGrid.innerHTML = teams.map(team => `
+        teamsGrid.innerHTML = teams.map(team => {
+            // For each pokemon in a team, find its corresponding entry in our clean 'standardPokemons' list to get the correct sprite ID
+            const teamPokemonsWithSprites = team.pokemons.map(p => {
+                const displayInfo = standardPokemons.find(sp => sp.original_id === p.id);
+                return { ...p, spriteId: displayInfo ? displayInfo.id : p.id };
+            });
+
+            return `
             <div class="card team-card" data-team-id="${team.id}">
                 <div class="card-header"><h3>${team.name}</h3></div>
                 <div class="team-preview">
-                    ${team.pokemons.slice(0, 6).map(p => `<div class="team-preview-pokemon" title="${p.name}">${p.name.substring(0,2).toUpperCase()}</div>`).join('')}
+                    ${teamPokemonsWithSprites.slice(0, 6).map(p => `<div class="team-preview-pokemon" title="${p.name}"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.spriteId}.png" alt="${p.name}"></div>`).join('')}
                 </div>
                 <div class="team-pokemons-list">
                     <h4>Pokémon:</h4>
-                    ${team.pokemons.map(p => `<p>• ${p.name}</p>`).join('')}
+                    ${teamPokemonsWithSprites.map(p => `<p><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.spriteId}.png" alt="${p.name}"> ${p.name}</p>`).join('')}
                 </div>
                 <div class="card-footer">
                     <button class="edit-team-btn" data-team-id="${team.id}">Edit</button>
                     <button class="delete-team-btn delete" data-team-id="${team.id}">Delete</button>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     };
     
     const fetchAndRenderTeams = async () => {
@@ -263,7 +277,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const init = async () => {
         try {
-            allPokemons = await apiFetch('/pokemon/');
+            const data = await apiFetch('/pokemon/');
+            allPokemons = data;
+
+            // Using your approved logic
+            let filtered = data.filter(p => p.name && !p.name.toLowerCase().includes('mega'));
+            standardPokemons = filtered.map((p, index) => ({
+                ...p,
+                original_id: p.id,
+                id: index + 1
+            }));
+
             populateTypeFilters();
             fetchAndRenderTeams();
         } catch (error) { console.error("Could not fetch Pokémon:", error); }
@@ -301,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('team-id-input').value = team ? team.id : '';
         document.getElementById('team-modal-title').textContent = team ? 'Edit Team' : 'Create Team';
         document.getElementById('team-name-input').value = team ? team.name : '';
-        selectedPokemonForTeam = team ? team.pokemons.map(p => p.id) : [];
+        selectedPokemonForTeam = team ? team.pokemons.map(p => p.id) : []; // Uses original IDs
         tabSelect.click();
         applySelectorFilters();
         updateTeamPreview();
@@ -312,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTerm = selectorSearch.value.toLowerCase();
         const activeTypeFilter = document.querySelector('#selector-type-filters button.active');
         const type = activeTypeFilter ? activeTypeFilter.dataset.type : null;
-        const filteredPokemons = allPokemons.filter(p => {
+        const filteredPokemons = standardPokemons.filter(p => {
             const nameMatch = p.name.toLowerCase().includes(searchTerm);
             const typeMatch = !type || p.type1.toLowerCase() === type || (p.type2 && p.type2.toLowerCase() === type);
             return nameMatch && typeMatch;
@@ -322,7 +346,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderSelectorGrid = (pokemons) => {
         teamPokemonSelectorGrid.innerHTML = pokemons.map(p => `
-            <div class="selector-card ${selectedPokemonForTeam.includes(p.id) ? 'selected' : ''}" data-pokemon-id="${p.id}">
+            <div class="selector-card ${selectedPokemonForTeam.includes(p.original_id) ? 'selected' : ''}" data-pokemon-id="${p.original_id}">
+                <img src="${getSpriteUrl(p)}" alt="${p.name}">
                 <span>${p.name}</span>
             </div>
         `).join('');
@@ -332,13 +357,13 @@ document.addEventListener('DOMContentLoaded', () => {
         tabReview.textContent = `Review Team (${selectedPokemonForTeam.length}/6)`;
         teamPreviewSlots.innerHTML = '';
         for (let i = 0; i < 6; i++) {
-            const pokemonId = selectedPokemonForTeam[i];
-            if (pokemonId) {
-                const pokemon = allPokemons.find(p => p.id === pokemonId);
+            const originalId = selectedPokemonForTeam[i];
+            if (originalId) {
+                const pokemon = allPokemons.find(p => p.id === originalId);
                 teamPreviewSlots.innerHTML += `
                     <div class="preview-slot filled" style="border-color: ${getTypeColor(pokemon.type1)};">
+                        <img src="${getSpriteUrl(pokemon)}" alt="${pokemon.name}">
                         ${pokemon.name}
-                        <span class="pokemon-type" style="background-color: ${getTypeColor(pokemon.type1)};">${pokemon.type1}</span>
                     </div>`;
             } else {
                 teamPreviewSlots.innerHTML += `<div class="preview-slot">Slot ${i + 1}</div>`;
@@ -356,7 +381,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Mobile Tab Listeners
     tabSelect.addEventListener('click', () => {
         pokemonSelectionPanel.classList.add('view-active');
         teamPreviewPanel.classList.remove('view-active');
@@ -373,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
     teamPokemonSelectorGrid.addEventListener('click', (e) => {
         const card = e.target.closest('.selector-card');
         if (!card) return;
-        const pokemonId = parseInt(card.dataset.pokemonId);
+        const pokemonId = parseInt(card.dataset.pokemonId); // This is the ORIGINAL ID
         const index = selectedPokemonForTeam.indexOf(pokemonId);
         if (index > -1) {
             selectedPokemonForTeam.splice(index, 1);
@@ -406,8 +430,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', () => btn.closest('.modal').classList.remove('active')));
     
     const populateTypeFilters = () => {
-        if (!allPokemons || allPokemons.length === 0) return;
-        const types = [...new Set(allPokemons.flatMap(p => [p.type1, p.type2]).filter(Boolean))].sort();
+        if (!standardPokemons || standardPokemons.length === 0) return;
+        const types = [...new Set(standardPokemons.flatMap(p => [p.type1, p.type2]).filter(Boolean))].sort();
         selectorTypeFilters.innerHTML = types.map(type => `<button data-type="${type.toLowerCase()}">${type}</button>`).join('');
     };
 
