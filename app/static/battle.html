@@ -3,22 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Battle Prophet - Pokémon Team Builder</title>
+    <title>PokéStreak - Pokémon Team Builder</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #3B4CCA;
-            --primary-gradient: linear-gradient(135deg, #3B4CCA 0%, #5A6EF0 100%);
-            --secondary-color: #FFDE00;
-            --accent-color: #CC0000;
-            --light-color: #f8fafc;
-            --dark-color: #1e293b;
-            --font-family: 'Nunito', sans-serif;
-            --cartoon-font: 'Fredoka One', cursive;
-            --card-shadow: 0 10px 25px rgba(59, 76, 202, 0.1);
-            --border-radius: 20px;
+            --primary-color: #3B4CCA; --primary-gradient: linear-gradient(135deg, #3B4CCA 0%, #5A6EF0 100%); --secondary-color: #FFDE00; --accent-color: #CC0000; --light-color: #f8fafc; --dark-color: #1e293b; --font-family: 'Nunito', sans-serif; --cartoon-font: 'Fredoka One', cursive; --card-shadow: 0 10px 25px rgba(59, 76, 202, 0.1); --border-radius: 20px;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: var(--font-family); background: linear-gradient(135deg, var(--light-color) 0%, #e2e8f0 100%); }
@@ -36,7 +27,7 @@
         .page-header h2 { font-family: var(--cartoon-font); font-size: 3rem; color: var(--primary-color); }
         .game-layout { display: grid; grid-template-columns: 3fr 1fr; gap: 40px; }
         .game-area, .leaderboard-area { background: #fff; padding: 30px; border-radius: var(--border-radius); box-shadow: var(--card-shadow); }
-        .scoreboard { text-align: center; margin-bottom: 20px; font-size: 1.2rem; font-weight: 700; }
+        .scoreboard { text-align: center; margin-bottom: 20px; font-size: 1.2rem; font-weight: 700; display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;}
         .matchup-zone { display: flex; justify-content: space-around; align-items: center; text-align: center; }
         .matchup-card { flex-basis: 45%; border: 4px solid #eee; border-radius: var(--border-radius); padding: 20px; cursor: pointer; transition: all 0.3s ease; }
         .matchup-card:hover { transform: translateY(-5px); border-color: var(--secondary-color); }
@@ -51,7 +42,13 @@
         #outcome-message.correct { color: #22c55e; }
         #outcome-message.incorrect { color: #ef4444; }
         #next-battle-btn { background: var(--primary-gradient); color: #fff; margin-top: 20px; }
-        .leaderboard-area h3 { font-family: var(--cartoon-font); text-align: center; margin-bottom: 20px; font-size: 1.8rem; }
+        .leaderboard-area { overflow: hidden; }
+        .leaderboard-header { padding: 0 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .leaderboard-header h3 { font-family: var(--cartoon-font); margin: 0; font-size: 1.8rem; }
+        .leaderboard-toggle-icon { font-weight: bold; font-size: 1.5rem; transition: transform 0.3s ease; }
+        .leaderboard-area.collapsed .leaderboard-toggle-icon { transform: rotate(-90deg); }
+        .leaderboard-content { max-height: 500px; overflow: hidden; transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out; padding: 20px 10px; }
+        .leaderboard-area.collapsed .leaderboard-content { max-height: 0; padding: 0 10px; }
         .leaderboard-list { list-style: none; padding: 0; }
         .leaderboard-list li { display: flex; justify-content: space-between; padding: 10px; border-radius: 10px; }
         .leaderboard-list li:nth-child(odd) { background-color: #f1f5f9; }
@@ -84,7 +81,9 @@
             <div class="nav-links">
                 <a href="/pokedex.html">Pokédex</a>
                 <a href="/teams.html">My Teams</a>
+                <a href="/safari.html">Catch Pokémon</a>
                 <a href="/battle.html">PokéStreak</a>
+                <a href="/shop.html">Shop</a>
                 <a href="/auth.html" id="auth-btn">Logout</a>
             </div>
         </div>
@@ -97,7 +96,9 @@
         <div class="game-layout">
             <div class="game-area">
                 <div class="scoreboard">
-                    Current Streak: <span id="current-score">0</span> | Your High Score: <span id="high-score">0</span>
+                    <span>Current Streak: <span id="current-score">0</span></span>
+                    <span>Your High Score: <span id="high-score">0</span></span>
+                    <span>PokéCoins: <span id="pokecoins-balance">0</span></span>
                 </div>
                 <div id="game-zone">
                     <div class="matchup-zone">
@@ -105,25 +106,31 @@
                         <div class="vs-separator">VS</div>
                         <div class="matchup-card" id="pokemon-b-card"></div>
                     </div>
-                    <p id="instruction-text">Let the Battle Begin!!</p>
+                    <p id="instruction-text">Who will win? Click your choice!</p>
                 </div>
                 <div id="result-area">
                     <p>You Picked: <strong id="user-pick"></strong></p>
-                    <p>The PokéStreak model Predicted: <strong id="oracle-pick"></strong> with <strong id="oracle-prob"></strong>% probability</p>
+                    <p>The Oracle Predicted: <strong id="oracle-pick"></strong> with <strong id="oracle-prob"></strong>% probability</p>
                     <h3 id="outcome-message"></h3>
                     <p id="points-awarded"></p>
                     <button id="next-battle-btn">Next Battle</button>
                 </div>
             </div>
-            <div class="leaderboard-area">
-                <h3>Top Trainers</h3>
-                <ol id="leaderboard-list" class="leaderboard-list"></ol>
+            <div class="leaderboard-area collapsed" id="leaderboard-container">
+                <div class="leaderboard-header">
+                    <h3>Top Trainers</h3>
+                    <span class="leaderboard-toggle-icon">▼</span>
+                </div>
+                <div class="leaderboard-content">
+                    <ol id="leaderboard-list" class="leaderboard-list"></ol>
+                </div>
             </div>
         </div>
     </main>
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
+    // --- Navbar ---
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
     hamburger.addEventListener('click', () => {
@@ -137,9 +144,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    // --- DOM Elements ---
     const authBtn = document.getElementById('auth-btn');
     const currentScoreEl = document.getElementById('current-score');
     const highScoreEl = document.getElementById('high-score');
+    const pokecoinsBalanceEl = document.getElementById('pokecoins-balance');
     const cardA = document.getElementById('pokemon-a-card');
     const cardB = document.getElementById('pokemon-b-card');
     const instructionText = document.getElementById('instruction-text');
@@ -151,14 +160,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const outcomeMessageEl = document.getElementById('outcome-message');
     const pointsAwardedEl = document.getElementById('points-awarded');
     const nextBattleBtn = document.getElementById('next-battle-btn');
+    const leaderboardContainer = document.getElementById('leaderboard-container');
+    const leaderboardHeader = leaderboardContainer.querySelector('.leaderboard-header');
     const leaderboardList = document.getElementById('leaderboard-list');
 
+    // --- Game State ---
     let pokemonTiers = { easy: [], medium: [], hard: [] };
     let standardPokemons = [];
     let currentScore = 0;
     let highScore = 0;
     let pokemonA = null;
     let pokemonB = null;
+    let playerProfile = null;
 
     const apiFetch = async (endpoint, options = {}) => {
         options.headers = { ...options.headers, 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` };
@@ -173,7 +186,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert(`Error: ${errorData.detail || 'Something went wrong'}`);
             throw new Error(errorData.detail);
         }
-        return response.json();
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            return response.json();
+        }
+        return null;
     };
 
     const getTypeColor = (type) => {
@@ -186,9 +203,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         return type ? colors[type.toLowerCase()] || '#68A090' : '#68A090';
     };
-
+    
     const getSpriteUrl = (pokemon) => {
-        // Uses the re-assigned sequential ID
         return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`;
     };
 
@@ -201,7 +217,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ${pokemon.type2 ? `<span class="pokemon-type" style="background-color: ${getTypeColor(pokemon.type2)};">${pokemon.type2}</span>` : ''}
             </div>
         `;
-        element.dataset.pokemonId = pokemon.original_id; // Use original ID for predictions
+        element.dataset.pokemonId = pokemon.original_id;
     };
     
     const renderLeaderboard = (users) => {
@@ -217,13 +233,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         resultArea.style.display = 'none';
         gameZone.style.display = 'block';
         instructionText.textContent = "Who will win? Click your choice!";
-        
+
         let pool = [];
         if (currentScore < 500) pool = pokemonTiers.easy;
         else if (currentScore < 1500) pool = [...pokemonTiers.easy, ...pokemonTiers.medium];
         else pool = [...pokemonTiers.medium, ...pokemonTiers.hard];
+
         if (pool.length < 2) pool = pokemonTiers.easy;
-        
         const shuffled = [...pool].sort(() => 0.5 - Math.random());
         [pokemonA, pokemonB] = shuffled.slice(0, 2);
 
@@ -254,25 +270,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     const showResult = async (prediction, userChoice) => {
         gameZone.style.display = 'none';
         resultArea.style.display = 'block';
+
         userPickEl.textContent = userChoice.name;
         oraclePickEl.textContent = prediction.predicted_winner;
         oracleProbEl.textContent = (parseFloat(prediction.win_probability) * 100).toFixed(0);
+
         const wasCorrect = userChoice.name === prediction.predicted_winner;
+
         if (wasCorrect) {
             const points = parseFloat(prediction.win_probability) < 0.5 ? 250 : 100;
+            const coinsEarned = 50;
             currentScore += points;
             currentScoreEl.textContent = currentScore;
             outcomeMessageEl.textContent = "CORRECT!";
             outcomeMessageEl.className = 'correct';
-            pointsAwardedEl.textContent = `+${points} points!`;
+            pointsAwardedEl.textContent = `+${points} points! (+${coinsEarned} PokéCoins)`;
+
+            try {
+                const updatedProfile = await apiFetch('/game/coins', {
+                    method: 'POST',
+                    body: JSON.stringify({ coins: coinsEarned })
+                });
+                pokecoinsBalanceEl.textContent = updatedProfile.poke_coins;
+            } catch (error) {
+                console.error("Failed to award coins:", error);
+            }
+
             nextBattleBtn.style.display = 'none';
             setTimeout(startNewRound, 2000);
+
         } else {
             outcomeMessageEl.textContent = "GAME OVER!";
             outcomeMessageEl.className = 'incorrect';
             pointsAwardedEl.textContent = `Final Streak: ${currentScore}`;
             nextBattleBtn.style.display = 'block';
             nextBattleBtn.textContent = 'Play Again';
+
             if (currentScore > highScore) {
                 highScore = currentScore;
                 highScoreEl.textContent = highScore;
@@ -289,9 +322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const init = async () => {
-        authBtn.textContent = 'Logout';
-        authBtn.href = "#";
-        authBtn.addEventListener('click', (e) => {
+        document.getElementById('auth-btn').addEventListener('click', (e) => {
             e.preventDefault();
             localStorage.removeItem('pokemonToken');
             window.location.href = '/auth.html';
@@ -303,13 +334,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentScoreEl.textContent = 0;
             startNewRound();
         });
+        
+        leaderboardHeader.addEventListener('click', () => {
+            leaderboardContainer.classList.toggle('collapsed');
+        });
 
         try {
-            const [userData, allPokemonData, leaderboardData] = await Promise.all([
-                apiFetch('/scores/me'),
+            const [userProfileData, allPokemonData, leaderboardData, userScoreData] = await Promise.all([
+                apiFetch('/game/profile'),
                 apiFetch('/pokemon/'),
-                apiFetch('/scores/leaderboard')
+                apiFetch('/scores/leaderboard'),
+                apiFetch('/scores/me')
             ]);
+            
+            playerProfile = userProfileData;
             
             let filtered = allPokemonData.filter(p => p.name && !p.name.toLowerCase().includes('mega') && p.Generation === 1);
             standardPokemons = filtered.map((p, index) => ({
@@ -329,10 +367,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error("Not enough Pokémon to start the game.");
             }
 
-            highScore = userData.battle_score ? userData.battle_score.score : 0;
+            highScore = userScoreData.battle_score ? userScoreData.battle_score.score : 0;
             highScoreEl.textContent = highScore;
+            pokecoinsBalanceEl.textContent = playerProfile.poke_coins;
+
             renderLeaderboard(leaderboardData);
             startNewRound();
+
         } catch (error) {
             console.error("Initialization failed:", error);
             instructionText.textContent = "Could not load game data. Please try again later.";

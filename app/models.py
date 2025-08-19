@@ -1,7 +1,6 @@
 from .database import Base
-from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Table
+from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, Table,JSON
 from sqlalchemy.orm import relationship
-
 # Association table for Many-to-Many
 team_pokemon = Table(
     "team_pokemon",
@@ -66,3 +65,34 @@ class BattleScore(Base):
     user_id = Column(Integer, ForeignKey("user_model.id"), unique=True) 
     
     user = relationship("User_model", back_populates="battle_score")
+
+    
+class PlayerProfile(Base):
+    __tablename__ = "player_profiles"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("user_model.id"), unique=True, nullable=False)
+    level = Column(Integer, default=1, nullable=False)
+    experience = Column(Integer, default=0, nullable=False)
+    poke_coins = Column(Integer, default=100, nullable=False)
+    pokeballs = Column(JSON, default={"pokeball": 10, "greatball": 0, "ultraball": 0})
+
+    owner = relationship("User_model")
+
+user_collection_association = Table(
+    "user_collection",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("user_model.id"), primary_key=True),
+    Column("pokemon_id", Integer, ForeignKey("pokemon_model.id"), primary_key=True),
+)
+
+User_model.collection = relationship(
+    "Pokemon_model",
+    secondary=user_collection_association,
+    back_populates="owned_by_users"
+)
+Pokemon_model.owned_by_users = relationship(
+    "User_model",
+    secondary=user_collection_association,
+    back_populates="collection"
+)
+User_model.profile = relationship("PlayerProfile", back_populates="owner", uselist=False)

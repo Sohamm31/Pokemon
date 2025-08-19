@@ -117,6 +117,8 @@
             <div class="nav-links">
                 <a href="/pokedex.html">Pokédex</a>
                 <a href="/teams.html" id="nav-teams">My Teams</a>
+                <a href="/safari.html">Catch Pokémon</a>
+                <a href="/shop.html">Shop</a>
                 <a href="/battle.html">PokéStreak</a>
                 <a href="/auth.html" id="auth-btn">Login / Signup</a>
             </div>
@@ -234,8 +236,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const getSpriteUrl = (pokemon) => {
-        // Use the re-assigned sequential ID for fetching the sprite
-        return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`;
+        // Find the re-assigned pokemon from our clean list to get the correct sequential ID for the sprite
+        const displayPokemon = standardPokemons.find(p => p.original_id === pokemon.id);
+        const spriteId = displayPokemon ? displayPokemon.id : pokemon.id;
+        return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${spriteId}.png`;
     };
 
     const renderTeams = (teams) => {
@@ -277,20 +281,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const init = async () => {
         try {
+            // First fetch ALL pokemon to create the re-indexed master list for sprites
             const data = await apiFetch('/pokemon/');
-            allPokemons = data;
-
-            // Using your approved logic
             let filtered = data.filter(p => p.name && !p.name.toLowerCase().includes('mega'));
             standardPokemons = filtered.map((p, index) => ({
                 ...p,
                 original_id: p.id,
                 id: index + 1
             }));
+            
+            // Now, fetch the user's personal collection to use in the builder
+            allPokemons = await apiFetch('/safari/collection');
 
             populateTypeFilters();
             fetchAndRenderTeams();
-        } catch (error) { console.error("Could not fetch Pokémon:", error); }
+        } catch (error) { console.error("Could not fetch necessary Pokémon data:", error); }
     };
 
     createTeamBtn.addEventListener('click', () => openTeamModal());
@@ -336,7 +341,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTerm = selectorSearch.value.toLowerCase();
         const activeTypeFilter = document.querySelector('#selector-type-filters button.active');
         const type = activeTypeFilter ? activeTypeFilter.dataset.type : null;
-        const filteredPokemons = standardPokemons.filter(p => {
+        
+        // Filter from the user's collection (allPokemons)
+        const filteredPokemons = allPokemons.filter(p => {
             const nameMatch = p.name.toLowerCase().includes(searchTerm);
             const typeMatch = !type || p.type1.toLowerCase() === type || (p.type2 && p.type2.toLowerCase() === type);
             return nameMatch && typeMatch;
@@ -346,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderSelectorGrid = (pokemons) => {
         teamPokemonSelectorGrid.innerHTML = pokemons.map(p => `
-            <div class="selector-card ${selectedPokemonForTeam.includes(p.original_id) ? 'selected' : ''}" data-pokemon-id="${p.original_id}">
+            <div class="selector-card ${selectedPokemonForTeam.includes(p.id) ? 'selected' : ''}" data-pokemon-id="${p.id}">
                 <img src="${getSpriteUrl(p)}" alt="${p.name}">
                 <span>${p.name}</span>
             </div>
@@ -430,8 +437,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', () => btn.closest('.modal').classList.remove('active')));
     
     const populateTypeFilters = () => {
-        if (!standardPokemons || standardPokemons.length === 0) return;
-        const types = [...new Set(standardPokemons.flatMap(p => [p.type1, p.type2]).filter(Boolean))].sort();
+        // Filters should be based on the types available in the user's collection
+        if (!allPokemons || allPokemons.length === 0) return;
+        const types = [...new Set(allPokemons.flatMap(p => [p.type1, p.type2]).filter(Boolean))].sort();
         selectorTypeFilters.innerHTML = types.map(type => `<button data-type="${type.toLowerCase()}">${type}</button>`).join('');
     };
 

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional,Dict
 from pydantic import BaseModel, EmailStr
 
 class PokemonBase(BaseModel):
@@ -46,7 +46,13 @@ class User(BaseModel):
     class Config:
         orm_mode = True
 
-
+class PlayerProfile(BaseModel):
+    level: int
+    experience: int
+    poke_coins: int
+    pokeballs: Dict[str, int]
+    class Config:
+        orm_mode = True
 
 class TeamCreate(BaseModel):
     name: str

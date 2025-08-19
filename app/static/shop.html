@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poké Mart - Pokémon Team Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3B4CCA; --primary-gradient: linear-gradient(135deg, #3B4CCA 0%, #5A6EF0 100%); --secondary-color: #FFDE00; --accent-color: #CC0000; --light-color: #f8fafc; --dark-color: #1e293b; --font-family: 'Nunito', sans-serif; --cartoon-font: 'Fredoka One', cursive; --card-shadow: 0 10px 25px rgba(59, 76, 202, 0.1); --border-radius: 20px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background: linear-gradient(135deg, var(--light-color) 0%, #e2e8f0 100%); }
+        .container { max-width: 1200px; margin: auto; padding: 0 20px; }
+        button { font-family: var(--font-family); font-weight: 700; border: none; padding: 12px 24px; border-radius: var(--border-radius); cursor: pointer; transition: all 0.3s ease; }
+        .navbar { background: var(--primary-gradient); color: #fff; padding: 1rem 0; position: sticky; top: 0; z-index: 1000; }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .navbar .logo { font-family: var(--cartoon-font); font-size: 2rem; color: var(--secondary-color); text-decoration: none; }
+        .navbar .nav-links { display: flex; align-items: center; gap: 10px; }
+        .navbar .nav-links a { color: #fff; padding: 10px 20px; text-decoration: none; font-weight: 700; border-radius: 25px; font-size: 1rem; }
+        .hamburger { display: none; cursor: pointer; }
+        .hamburger .bar { display: block; width: 25px; height: 3px; margin: 5px auto; transition: all 0.3s ease-in-out; background-color: white; }
+        main { padding: 40px 0; text-align: center; }
+        .shop-header { margin-bottom: 40px; }
+        .shop-header h2 { font-family: var(--cartoon-font); font-size: 3rem; color: var(--primary-color); }
+        .coin-balance { font-size: 1.5rem; font-weight: 700; margin-top: 10px; background: #fff; padding: 10px 20px; border-radius: 20px; display: inline-block; box-shadow: var(--card-shadow); }
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .item-card { background: #fff; padding: 20px; border-radius: var(--border-radius); box-shadow: var(--card-shadow); }
+        .item-card img { width: 80px; height: 80px; margin-bottom: 15px; image-rendering: pixelated; }
+        .item-card h3 { font-size: 1.5rem; margin-bottom: 10px; }
+        .item-card .price { font-size: 1.2rem; font-weight: bold; color: var(--accent-color); margin-bottom: 15px; }
+        .item-card .inventory { margin-bottom: 20px; font-weight: 700; }
+        .purchase-controls { display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .purchase-controls input { width: 60px; text-align: center; padding: 8px; border-radius: 10px; border: 2px solid #ccc; font-size: 1rem; }
+        .purchase-controls button { background: var(--primary-gradient); color: white; padding: 10px 20px; }
+        
+        /* --- Responsive Styles --- */
+        @media (max-width: 768px) {
+            .navbar .nav-links { position: fixed; left: -100%; top: 70px; gap: 0; flex-direction: column; background-color: var(--primary-color); width: 100%; text-align: center; transition: 0.3s; padding-bottom: 20px; box-shadow: 0 10px 10px rgba(0,0,0,0.1); }
+            .navbar .nav-links.active { left: 0; }
+            .navbar .nav-links a { margin: 16px 0; }
+            .hamburger { display: block; }
+            .hamburger.active .bar:nth-child(2) { opacity: 0; }
+            .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+            .shop-header h2 { font-size: 2.5rem; }
+            .coin-balance { font-size: 1.2rem; }
+        }
+        @media (max-width: 480px) {
+            .navbar .logo { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">PokéBuilder</a>
+            <div class="hamburger">
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            </div>
+            <div class="nav-links">
+                <a href="/pokedex.html">Pokédex</a>
+                <a href="/teams.html">My Teams</a>
+                <a href="/battle.html">PokéStreak</a>
+                <a href="/safari.html">Catch Pokemon</a>
+                <a href="/shop.html">Shop</a>
+                <a href="/auth.html" id="auth-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="shop-header">
+            <h2>Poké Mart</h2>
+            <div class="coin-balance">
+                PokéCoins: <span id="coin-display">0</span>
+            </div>
+        </div>
+
+        <div class="shop-grid">
+            <div class="item-card" data-item="pokeball">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="Pokéball">
+                <h3>Pokéball</h3>
+                <p class="price">200 PokéCoins</p>
+                <p class="inventory">You have: <span id="pokeball-inv">0</span></p>
+                <div class="purchase-controls">
+                    <input type="number" value="1" min="1" class="quantity-input">
+                    <button class="buy-btn">Buy</button>
+                </div>
+            </div>
+            <div class="item-card" data-item="greatball">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png" alt="Great Ball">
+                <h3>Great Ball</h3>
+                <p class="price">600 PokéCoins</p>
+                <p class="inventory">You have: <span id="greatball-inv">0</span></p>
+                <div class="purchase-controls">
+                    <input type="number" value="1" min="1" class="quantity-input">
+                    <button class="buy-btn">Buy</button>
+                </div>
+            </div>
+            <div class="item-card" data-item="ultraball">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png" alt="Ultra Ball">
+                <h3>Ultra Ball</h3>
+                <p class="price">1200 PokéCoins</p>
+                <p class="inventory">You have: <span id="ultraball-inv">0</span></p>
+                <div class="purchase-controls">
+                    <input type="number" value="1" min="1" class="quantity-input">
+                    <button class="buy-btn">Buy</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // --- Navbar ---
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navLinks.classList.toggle('active');
+    });
+
+    const authToken = localStorage.getItem('pokemonToken');
+    if (!authToken) {
+        window.location.href = `/auth.html?redirect=${window.location.pathname}`;
+        return;
+    }
+    
+    // --- DOM Elements ---
+    const coinDisplay = document.getElementById('coin-display');
+    const pokeballInv = document.getElementById('pokeball-inv');
+    const greatballInv = document.getElementById('greatball-inv');
+    const ultraballInv = document.getElementById('ultraball-inv');
+    const buyBtns = document.querySelectorAll('.buy-btn');
+    const authBtn = document.getElementById('auth-btn');
+
+    const apiFetch = async (endpoint, options = {}) => {
+        options.headers = { ...options.headers, 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` };
+        const response = await fetch(endpoint, options);
+        if (response.status === 401) {
+            localStorage.removeItem('pokemonToken');
+            window.location.href = `/auth.html?redirect=${window.location.pathname}`;
+            throw new Error("Unauthorized");
+        }
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Error: ${errorData.detail || 'Something went wrong'}`);
+            throw new Error(errorData.detail);
+        }
+        return response.json();
+    };
+
+    const updateUI = (profile) => {
+        coinDisplay.textContent = profile.poke_coins;
+        pokeballInv.textContent = profile.pokeballs.pokeball || 0;
+        greatballInv.textContent = profile.pokeballs.greatball || 0;
+        ultraballInv.textContent = profile.pokeballs.ultraball || 0;
+    };
+    
+    buyBtns.forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const card = btn.closest('.item-card');
+            const itemName = card.dataset.item;
+            const quantity = parseInt(card.querySelector('.quantity-input').value);
+
+            if (!quantity || quantity <= 0) {
+                alert("Please enter a valid quantity.");
+                return;
+            }
+            
+            try {
+                btn.disabled = true;
+                btn.textContent = 'Buying...';
+                const updatedProfile = await apiFetch('/game/buy', {
+                    method: 'POST',
+                    body: JSON.stringify({ item_name: itemName, quantity: quantity })
+                });
+                alert(`Successfully purchased ${quantity} ${itemName}(s)!`);
+                updateUI(updatedProfile);
+            } catch (error) {
+                console.error("Purchase failed:", error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Buy';
+            }
+        });
+    });
+
+    // --- Initial Load ---
+    const init = async () => {
+        authBtn.textContent = 'Logout';
+        authBtn.href = "#";
+        authBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('pokemonToken');
+            window.location.href = '/auth.html';
+        });
+
+        try {
+            const profile = await apiFetch('/game/profile');
+            updateUI(profile);
+        } catch (error) {
+            document.querySelector('main').innerHTML = '<h2>Error</h2><p>Could not load player profile. Please try logging in again.</p>';
+        }
+    };
+    
+    init();
+});
+</script>
+</body>
+</html>

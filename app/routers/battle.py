@@ -12,10 +12,12 @@ router = APIRouter(
     prefix="/predict",
     tags=["Prediction"]
 )
+
+# Using your specified paths for the models
 modelpath = "app/ml_models/battle_predictor.pkl"
 encoderpath = "app/ml_models/type_encoder.pkl"
+
 # --- Load Models ---
-# Make sure the .pkl files are in the root of your project directory
 try:
     model = joblib.load(modelpath)
     type_encoder = joblib.load(encoderpath)
@@ -23,7 +25,7 @@ try:
 except FileNotFoundError:
     model = None
     type_encoder = None
-    print("ML model or encoder not found. Prediction endpoint will be disabled.")
+    print(f"Error: Could not find model files at {modelpath} or {encoderpath}. Prediction endpoint will be disabled.")
 
 # --- Schemas ---
 class BattleRequest(BaseModel):
@@ -44,7 +46,7 @@ def predict_battle_winner(
     if not model or not type_encoder:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Prediction service is not available. Model has not been trained."
+            detail="Prediction service is not available. Model has not been trained or loaded."
         )
 
     # Fetch Pokémon from the database
@@ -54,7 +56,7 @@ def predict_battle_winner(
     if not p1 or not p2:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="One or more Pokémon not found.")
 
-    # --- Preprocess data for prediction ---
+    # --- Preprocess data for prediction (using the simple, raw stats) ---
     data = {
         'p1_HP': [p1.HP], 'p1_Attack': [p1.Attack], 'p1_Defense': [p1.Defense], 'p1_Speed': [p1.Speed],
         'p1_Type 1': [p1.type1], 'p1_Type 2': [p1.type2 if p1.type2 else 'None'],
@@ -71,6 +73,7 @@ def predict_battle_winner(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid Pokémon type found: {e}")
 
+    # The list of features the old model expects
     features = [
         'p1_HP', 'p1_Attack', 'p1_Defense', 'p1_Speed', 'p1_Type 1_encoded', 'p1_Type 2_encoded',
         'p2_HP', 'p2_Attack', 'p2_Defense', 'p2_Speed', 'p2_Type 1_encoded', 'p2_Type 2_encoded'

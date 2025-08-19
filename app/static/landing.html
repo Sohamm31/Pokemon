@@ -28,14 +28,17 @@
             line-height: 1.6;
         }
         .container { max-width: 1000px; margin: auto; padding: 0 20px; }
-        button {
+        button, .feature-button {
             font-family: var(--font-family);
             font-weight: 700;
             border: none;
-            padding: 12px 24px;
+            padding: 12px 28px;
+            font-size: 1.1rem;
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
         }
         .navbar {
             background: var(--primary-gradient);
@@ -91,14 +94,17 @@
             margin-bottom: 20px;
         }
         .hero-section p {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             margin-top: 20px;
             color: var(--dark-color);
             font-weight: 600;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .hero-animation {
             width: 100%;
-            max-width: 600px; /* <-- REDUCED FROM 400px */
+            max-width:700px;
             margin: 0 auto 20px;
         }
         .catchphrase {
@@ -108,22 +114,10 @@
             margin: 30px 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
-        #start-building-btn {
-            background: var(--accent-color);
-            color: #fff;
-            margin-top: 15px;
-            font-size: 1.1rem;
-            padding: 15px 30px;
-            border-radius: 20px;
-            border: none;
-            cursor: pointer;
-        }
-
-        /* --- UPDATED Alternating Features Section Styles --- */
         .feature-row {
             padding: 80px 0;
         }
-        .feature-row:nth-child(odd) {
+        .feature-row:nth-child(even) {
              background: #fff;
         }
         .feature-row .container {
@@ -157,14 +151,8 @@
         .feature-text .feature-button {
             background: var(--primary-gradient);
             color: #fff;
-            padding: 12px 28px;
-            font-size: 1.1rem;
-            text-decoration: none;
-            border-radius: 20px;
-            display: inline-block;
         }
         
-        /* --- Responsive Styles --- */
         @media (max-width: 768px) {
             .navbar .container {
                 flex-wrap: wrap;
@@ -172,7 +160,7 @@
             .navbar .nav-links {
                 position: fixed;
                 left: -100%;
-                top: 80px; /* Adjust based on navbar height */
+                top: 80px;
                 gap: 0;
                 flex-direction: column;
                 background-color: var(--primary-color);
@@ -191,17 +179,11 @@
             .hamburger {
                 display: block;
             }
-            .hamburger.active .bar:nth-child(2) {
-                opacity: 0;
-            }
-            .hamburger.active .bar:nth-child(1) {
-                transform: translateY(8px) rotate(45deg);
-            }
-            .hamburger.active .bar:nth-child(3) {
-                transform: translateY(-8px) rotate(-45deg);
-            }
+            .hamburger.active .bar:nth-child(2) { opacity: 0; }
+            .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
             .hero-section h1 { font-size: 3rem; }
-            .hero-section p { font-size: 1.5rem; }
+            .hero-section p { font-size: 1.2rem; }
             .catchphrase { font-size: 2rem; }
             .feature-row .container, .feature-row.row-reverse .container {
                 flex-direction: column;
@@ -210,7 +192,7 @@
         }
         @media (max-width: 480px) {
             .hero-section h1 { font-size: 2.5rem; }
-            .hero-section p { font-size: 1.2rem; }
+            .hero-section p { font-size: 1.1rem; }
             .catchphrase { font-size: 1.8rem; }
             .navbar .logo { font-size: 1.8rem; }
             .feature-text h2 { font-size: 2rem; }
@@ -230,6 +212,9 @@
             <div class="nav-links">
                 <a href="/pokedex.html">Pokédex</a>
                 <a href="/teams.html" id="nav-teams">My Teams</a>
+                <a href="/starter.html" id="nav-starter" style="display: none;">Choose Starter</a>
+                <a href="/safari.html" id="nav-safari" style="display: none;">Safari Zone</a>
+                <a href="/shop.html" id="nav-shop" style="display: none;">Shop</a>
                 <a href="/battle.html">PokéStreak</a>
                 <a href="/auth.html" id="auth-btn">Login / Signup</a>
             </div>
@@ -241,76 +226,107 @@
             <div class="container">
                 <h1>Welcome, Pokémon Trainer!</h1>
                 <div class="hero-animation">
-                    <dotlottie-wc src="https://lottie.host/2e1a5fbd-8d09-4b85-b124-c2a0049b63d5/WILApVkmfU.lottie" speed="1" autoplay loop></dotlottie-wc>
+                    <dotlottie-wc src="https://lottie.host/73ef01de-b508-48f8-b6e9-d01f7d602c23/Khw5iVsJyR.lottie" speed="1" autoplay loop></dotlottie-wc>
                 </div>
                 <div class="catchphrase">Gotta Catch 'Em All!</div>
-                <p>Browse the Pokédex, create strategic teams, and test your knowledge against our AI battle predictor in the PokéStreak game!</p>
+                <p>Choose a starter, catch new Pokémon in the Safari Zone, and test your knowledge in the AI-powered PokéStreak game!</p>
             </div>
         </section>
 
-        <section class="feature-row">
-            <div class="container">
-                <div class="feature-image">
-                    <dotlottie-wc src="https://lottie.host/07796f63-2009-4a99-a059-dbe9a3629090/qlc40xjRMD.lottie" speed="1" autoplay loop></dotlottie-wc>
+        <div class="features-section">
+            <section class="feature-row">
+                <div class="container">
+                    <div class="feature-image">
+                        <dotlottie-wc src="https://lottie.host/07796f63-2009-4a99-a059-dbe9a3629090/qlc40xjRMD.lottie" speed="1" autoplay loop></dotlottie-wc>
+                    </div>
+                    <div class="feature-text">
+                        <h2>Step 1: Choose Your Starter</h2>
+                        <p>Every great journey begins with a choice. Select Bulbasaur, Charmander, or Squirtle to be your very first partner and start your collection.</p>
+                        <a href="/starter.html" class="feature-button">Choose Now</a>
+                    </div>
                 </div>
-                <div class="feature-text">
-                    <h2>Explore the Pokédex</h2>
-                    <p>Browse, search, and filter through all 151 original Pokémon. Get all the essential stats you need to make informed decisions for your team.</p>
-                    <a href="/pokedex.html" class="feature-button">View Pokédex</a>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <section class="feature-row row-reverse">
-             <div class="container">
-                <div class="feature-image">
-                    <dotlottie-wc src="https://lottie.host/89c502d2-a93c-405e-98e5-3be251713755/6UR6mcMyaU.lottie" speed="1" autoplay loop></dotlottie-wc>                </div>
-                <div class="feature-text">
-                    <h2>Build Strategic Teams</h2>
-                    <p>Our intuitive team builder allows you to create, manage, and save multiple teams. Assemble your squad and get ready for any challenge.</p>
-                    <a href="/teams.html" class="feature-button">Build a Team</a>
+            <section class="feature-row row-reverse">
+                 <div class="container">
+                    <div class="feature-image">
+                        <dotlottie-wc src="https://lottie.host/89c502d2-a93c-405e-98e5-3be251713755/6UR6mcMyaU.lottie" speed="1" autoplay loop></dotlottie-wc>                </div>
+                    <div class="feature-text">
+                        <h2>Step 2: Explore the Safari Zone</h2>
+                        <p>Discover and catch new Pokémon in the wild! Test your timing in our mini-game to add to your collection and unlock rarer encounters as you level up.</p>
+                        <a href="/safari.html" class="feature-button">Explore Now</a>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section class="feature-row">
-             <div class="container">
-                <div class="feature-image">
-                    <dotlottie-wc src="https://lottie.host/c9c11a47-0c6a-4ea0-8c87-76aaa7ccf4be/RcKiwFs4Lm.lottie" speed="1" autoplay loop></dotlottie-wc>                </div>
-                <div class="feature-text">
-                    <h2>Play PokéStreak</h2>
-                    <p>Test your intuition against our AI-powered battle predictor! Climb the global leaderboard by correctly predicting match outcomes in a challenging streak-based game.</p>
-                    <a href="/battle.html" class="feature-button">Play Now</a>
+            <section class="feature-row">
+                 <div class="container">
+                    <div class="feature-image">
+                        <dotlottie-wc src="https://lottie.host/e1f13e49-644d-4a85-a535-12d7fcc68ed4/QxIYGMkMia.lottie" speed="1" autoplay loop></dotlottie-wc>                </div>
+                    <div class="feature-text">
+                        <h2>Step 3: Play PokéStreak & Earn</h2>
+                        <p>Test your intuition against our AI battle predictor! Earn high scores to climb the leaderboard and win PokéCoins to spend in the shop.</p>
+                        <a href="/battle.html" class="feature-button">Play Now</a>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
     </main>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
+    const authToken = localStorage.getItem('pokemonToken');
+    const authBtn = document.getElementById('auth-btn');
+    const navStarter = document.getElementById('nav-starter');
+    const navSafari = document.getElementById('nav-safari');
+    const navShop = document.getElementById('nav-shop');
 
     hamburger.addEventListener('click', () => {
         hamburger.classList.toggle('active');
         navLinks.classList.toggle('active');
     });
-    
-    const authToken = localStorage.getItem('pokemonToken');
-    const authBtn = document.getElementById('auth-btn');
 
-    if (authToken) {
-        authBtn.textContent = 'Logout';
-        authBtn.href = "#"; // Prevent navigation
-        authBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('pokemonToken');
-            window.location.href = '/auth.html';
-        });
-    } else {
-        authBtn.textContent = 'Login / Signup';
-        authBtn.href = '/auth.html';
-    }
+    const apiFetch = async (endpoint) => {
+        const headers = { 'Authorization': `Bearer ${authToken}` };
+        const response = await fetch(endpoint, { headers });
+        if (!response.ok) {
+            if(response.status === 401) localStorage.removeItem('pokemonToken');
+            throw new Error('Failed to fetch data');
+        }
+        return response.json();
+    };
+
+    const setupNavbar = async () => {
+        if (authToken) {
+            authBtn.textContent = 'Logout';
+            authBtn.href = "#";
+            authBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('pokemonToken');
+                window.location.href = '/auth.html';
+            });
+
+            try {
+                const collection = await apiFetch('/safari/collection');
+                navShop.style.display = 'block';
+                if (collection && collection.length === 0) {
+                    navStarter.style.display = 'block';
+                } else {
+                    navSafari.style.display = 'block';
+                }
+            } catch (error) {
+                console.error("Could not fetch user collection for navbar:", error);
+            }
+
+        } else {
+            authBtn.textContent = 'Login / Signup';
+            authBtn.href = '/auth.html';
+        }
+    };
+
+    setupNavbar();
 });
 </script>
 </body>

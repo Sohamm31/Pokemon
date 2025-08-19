@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Starter! - Pokémon Team Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3B4CCA;
+            --secondary-color: #FFDE00;
+            --accent-color: #CC0000;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --font-family: 'Nunito', sans-serif;
+            --cartoon-font: 'Fredoka One', cursive;
+            --card-shadow: 0 10px 25px rgba(59, 76, 202, 0.1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, var(--light-color) 0%, #e2e8f0 100%);
+            color: var(--dark-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container { max-width: 800px; padding: 20px; }
+        h1 {
+            font-family: var(--cartoon-font);
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        p { font-size: 1.2rem; margin-bottom: 40px; }
+        .starter-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .starter-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 4px solid transparent;
+        }
+        .starter-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--secondary-color);
+        }
+        .starter-card img {
+            width: 150px;
+            height: 150px;
+            image-rendering: pixelated;
+        }
+        .starter-card h3 {
+            font-family: var(--cartoon-font);
+            font-size: 1.5rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Choose Your Partner!</h1>
+        <p>Every great journey starts with a single choice. Pick your first Pokémon to begin your adventure.</p>
+        <div class="starter-selection" id="starter-selection">
+            </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const authToken = localStorage.getItem('pokemonToken');
+    if (!authToken) {
+        window.location.href = `/auth.html?redirect=${window.location.pathname}`;
+        return;
+    }
+
+    const starterSelection = document.getElementById('starter-selection');
+
+    const apiFetch = async (endpoint, options = {}) => {
+        options.headers = { ...options.headers, 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` };
+        const response = await fetch(endpoint, options);
+        if (response.status === 401) {
+            localStorage.removeItem('pokemonToken');
+            window.location.href = `/auth.html?redirect=${window.location.pathname}`;
+            throw new Error("Unauthorized");
+        }
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Error: ${errorData.detail || 'Something went wrong'}`);
+            throw new Error(errorData.detail);
+        }
+        return response.json();
+    };
+
+    const renderStarters = (starters) => {
+        starterSelection.innerHTML = starters.map(p => `
+            <div class="starter-card" data-original-id="${p.id}" data-name="${p.name}">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" alt="${p.name}">
+                <h3>${p.name}</h3>
+            </div>
+        `).join('');
+
+        document.querySelectorAll('.starter-card').forEach(card => {
+            card.addEventListener('click', handleStarterChoice);
+        });
+    };
+
+    const handleStarterChoice = async (e) => {
+        const card = e.currentTarget;
+        const pokemonId = parseInt(card.dataset.originalId);
+        const pokemonName = card.dataset.name;
+        
+        if (confirm(`Do you choose ${pokemonName} as your starter?`)) {
+            try {
+                await apiFetch('/safari/starter', {
+                    method: 'POST',
+                    body: JSON.stringify({ pokemon_id: pokemonId })
+                });
+                alert(`${pokemonName} is now your partner! Let's get started!`);
+                window.location.href = '/';
+            } catch (error) {
+                console.error("Failed to choose starter:", error);
+            }
+        }
+    };
+
+    const init = async () => {
+        try {
+            const collection = await apiFetch('/safari/collection');
+            if (collection && collection.length > 0) {
+                alert("You've already chosen a starter! Redirecting to the home page.");
+                window.location.href = '/';
+                return;
+            }
+
+            const allPokemonData = await apiFetch('/pokemon/');
+            
+            // --- THE DEFINITIVE FIX ---
+            // Find the starters by their original, permanent ID.
+            const starters = [
+                allPokemonData.find(p => p.id === 1), // Bulbasaur
+                allPokemonData.find(p => p.id === 4), // Charmander
+                allPokemonData.find(p => p.id === 7)  // Squirtle
+            ].filter(Boolean); // Filter out any nulls if a starter isn't found
+
+            if (starters.length < 3) {
+                throw new Error("Could not find all starter Pokémon in the database.");
+            }
+
+            renderStarters(starters);
+        } catch (error) {
+            document.querySelector('.container').innerHTML = "<h2>Error</h2><p>Could not load data. Please try again.</p>";
+            console.error("Initialization failed:", error);
+        }
+    };
+
+    init();
+});
+</script>
+</body>
+</html>

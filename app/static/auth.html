@@ -23,19 +23,21 @@
         body {
             font-family: var(--font-family);
             background: linear-gradient(135deg, var(--light-color) 0%, #e2e8f0 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
         .auth-container {
-            padding: 100px 20px 40px; /* Padding top for navbar */
-            max-width: 450px;
-            margin: 0 auto;
-        }
-        .auth-content {
-             background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.95);
             padding: 40px;
             border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 450px;
             box-shadow: 0 20px 40px rgba(59, 76, 202, 0.2);
         }
-        .auth-content h2 {
+        .auth-container h2 {
             text-align: center;
             margin-bottom: 25px;
             font-family: var(--cartoon-font);
@@ -63,101 +65,49 @@
         }
         .form-toggle { text-align: center; margin-top: 20px; }
         .form-toggle a { color: var(--primary-color); cursor: pointer; text-decoration: underline; font-weight: 700; }
-        
-        /* --- Navbar Styles --- */
-        .navbar {
-            background: var(--primary-gradient);
-            color: #fff;
-            padding: 1rem 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-        .navbar .container { max-width: 1200px; margin: auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
-        .navbar .logo { font-family: var(--cartoon-font); font-size: 2rem; color: var(--secondary-color); text-shadow: 3px 3px 6px rgba(0,0,0,0.3); text-decoration: none; }
-        .navbar .nav-links { display: flex; align-items: center; gap: 10px; }
-        .navbar .nav-links a { color: #fff; padding: 10px 20px; text-decoration: none; font-weight: 700; background: rgba(255,255,255,0.1); border-radius: 25px; font-size: 1rem; }
-        .hamburger { display: none; cursor: pointer; }
-        .hamburger .bar { display: block; width: 25px; height: 3px; margin: 5px auto; transition: all 0.3s ease-in-out; background-color: white; }
-
-        /* --- Responsive Styles --- */
-        @media (max-width: 768px) {
-            .navbar .nav-links {
-                position: fixed;
-                left: -100%;
-                top: 70px; /* Adjust based on navbar height */
-                gap: 0;
-                flex-direction: column;
-                background-color: var(--primary-color);
-                width: 100%;
-                text-align: center;
-                transition: 0.3s;
-                padding-bottom: 20px;
-                box-shadow: 0 10px 10px rgba(0,0,0,0.1);
-            }
-            .navbar .nav-links.active { left: 0; }
-            .navbar .nav-links a { margin: 16px 0; }
-            .hamburger { display: block; }
-            .hamburger.active .bar:nth-child(2) { opacity: 0; }
-            .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-            .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+        .home-link {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            color: var(--dark-color);
+            font-weight: 700;
         }
         @media (max-width: 480px) {
-             .auth-container { padding: 80px 10px 20px; }
-             .auth-content { padding: 25px; }
+            body {
+                align-items: flex-start;
+                padding-top: 40px;
+            }
+            .auth-container {
+                padding: 25px;
+            }
+            .auth-container h2 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
 <body>
-
-    <nav class="navbar">
-        <div class="container">
-            <a href="/" class="logo">PokéBuilder</a>
-            <div class="hamburger">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </div>
-            <div class="nav-links">
-                <a href="/pokedex.html">Pokédex</a>
-                <a href="/teams.html" id="nav-teams">My Teams</a>
-                <a href="/auth.html" id="auth-btn">Login / Signup</a>
-            </div>
-        </div>
-    </nav>
-    
     <div class="auth-container">
-        <div class="auth-content">
-            <form id="login-form" class="modal-form">
-                <h2>Login</h2>
-                <input type="text" name="username" placeholder="Username" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <button type="submit">Login</button>
-                <p class="form-toggle">Don't have an account? <a id="show-signup">Sign up</a></p>
-            </form>
-            <form id="signup-form" class="modal-form" style="display:none;">
-                <h2>Sign Up</h2>
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="text" name="username" placeholder="Username" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <button type="submit">Sign Up</button>
-                <p class="form-toggle">Already have an account? <a id="show-login">Login</a></p>
-            </form>
-        </div>
+        <form id="login-form" class="modal-form">
+            <h2>Login</h2>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+            <p class="form-toggle">Don't have an account? <a id="show-signup">Sign up</a></p>
+        </form>
+        <form id="signup-form" class="modal-form" style="display:none;">
+            <h2>Sign Up</h2>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Sign Up</button>
+            <p class="form-toggle">Already have an account? <a id="show-login">Login</a></p>
+        </form>
+        <a href="/" class="home-link">← Back to Home</a>
     </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const hamburger = document.querySelector('.hamburger');
-    const navLinks = document.querySelector('.nav-links');
-
-    hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('active');
-        navLinks.classList.toggle('active');
-    });
-
     const loginForm = document.getElementById('login-form');
     const signupForm = document.getElementById('signup-form');
     const showSignup = document.getElementById('show-signup');
@@ -172,10 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         signupForm.style.display = 'none';
         loginForm.style.display = 'block';
     });
-
-    // Check if user was redirected here because they weren't logged in
-    const params = new URLSearchParams(window.location.search);
-    const redirectUrl = params.get('redirect');
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -194,8 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const data = await response.json();
             localStorage.setItem('pokemonToken', data.access_token);
-            // If they were redirected from a page, send them back. Otherwise, go to teams page.
-            window.location.href = redirectUrl || '/teams.html'; 
+            // --- REDIRECT LOGIC UPDATED ---
+            window.location.href = '/'; // Redirect to the landing page
         } catch (error) {
             alert(error.message);
         }

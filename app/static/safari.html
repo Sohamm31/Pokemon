@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch Pokémon - Pokémon Team Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Fredoka+One:wght@400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3B4CCA; --primary-gradient: linear-gradient(135deg, #3B4CCA 0%, #5A6EF0 100%); --secondary-color: #FFDE00; --accent-color: #CC0000; --light-color: #f8fafc; --dark-color: #1e293b; --font-family: 'Nunito', sans-serif; --cartoon-font: 'Fredoka One', cursive; --card-shadow: 0 10px 25px rgba(59, 76, 202, 0.1); --border-radius: 20px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-family); background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%); overflow-x: hidden; }
+        .container { max-width: 1200px; margin: auto; padding: 0 20px; }
+        button { font-family: var(--font-family); font-weight: 700; border: none; padding: 12px 24px; border-radius: var(--border-radius); cursor: pointer; transition: all 0.3s ease; }
+        button:disabled { cursor: not-allowed; filter: grayscale(80%); }
+        .navbar { background: var(--primary-gradient); color: #fff; padding: 1rem 0; position: sticky; top: 0; z-index: 1000; }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .navbar .logo { font-family: var(--cartoon-font); font-size: 2rem; color: var(--secondary-color); text-decoration: none; }
+        .navbar .nav-links { display: flex; align-items: center; gap: 10px; }
+        .navbar .nav-links a { color: #fff; padding: 10px 20px; text-decoration: none; font-weight: 700; border-radius: 25px; font-size: 1rem; }
+        .hamburger { display: none; cursor: pointer; }
+        .hamburger .bar { display: block; width: 25px; height: 3px; margin: 5px auto; transition: all 0.3s ease-in-out; background-color: white; }
+        main { padding: 40px 0; text-align: center; }
+        .safari-zone { background: #fff; padding: 30px; border-radius: var(--border-radius); box-shadow: var(--card-shadow); max-width: 600px; margin: auto; min-height: 500px; display: flex; flex-direction: column; justify-content: center; }
+        .safari-zone h2 { font-family: var(--cartoon-font); font-size: 2.5rem; color: var(--primary-color); }
+        #explore-btn, #play-again-btn { background: var(--primary-gradient); color: #fff; font-size: 1.2rem; padding: 15px 30px; margin-top: 15px; }
+        #encounter-area { display: none; }
+        .sprite-container { position: relative; height: 150px; margin-top: 20px; }
+        #encounter-sprite { width: 150px; height: 150px; image-rendering: pixelated; position: absolute; left: 50%; top: 0; transform: translateX(-50%); }
+        .pokeball-animation { width: 40px; height: 40px; position: absolute; left: 50%; top: 50%; display: none; z-index: 100; transform-origin: center; }
+        #encounter-name { font-size: 2rem; font-weight: 900; margin: 10px 0; text-transform: capitalize; }
+        #timing-bar-container { background: #e0e0e0; border-radius: 15px; height: 40px; margin: 20px auto; max-width: 400px; border: 3px solid var(--dark-color); position: relative; overflow: hidden; }
+        #timing-bar-zones { display: flex; height: 100%; }
+        .zone { height: 100%; }
+        .zone-red { background: #ef4444; }
+        .zone-yellow { background: #facc15; }
+        .zone-green { background: #4ade80; }
+        #timing-bar-marker { position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: var(--dark-color); }
+        .action-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .action-buttons button, .action-buttons select { padding: 10px 20px; border-radius: 15px; border: 2px solid var(--dark-color); font-size: 1rem; font-weight: 700; }
+        #throw-ball-btn { background: var(--accent-color); color: white; }
+        #skip-btn { background: #9ca3af; color: white; }
+        #result-message { font-size: 1.5rem; font-weight: bold; margin-top: 20px; min-height: 2.2rem; }
+        #pokeball-count { font-weight: bold; margin-top: 15px; }
+        #play-again-area { display: none; margin-top: 20px; display: flex; justify-content: center; gap: 15px;}
+        .confetti { position: fixed; width: 10px; height: 10px; background-color: #f00; opacity: 0; animation: confetti-fall 2s ease-out forwards; }
+
+        @keyframes idle-animation { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -10px); } }
+        @keyframes shake-animation { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+        @keyframes confetti-fall { 0% { transform: translateY(0) rotateZ(0); opacity: 1; } 100% { transform: translateY(100vh) rotateZ(360deg); opacity: 0; } }
+        
+        @media (max-width: 768px) {
+            .navbar .nav-links { position: fixed; left: -100%; top: 70px; gap: 0; flex-direction: column; background-color: var(--primary-color); width: 100%; text-align: center; transition: 0.3s; padding-bottom: 20px; box-shadow: 0 10px 10px rgba(0,0,0,0.1); }
+            .navbar .nav-links.active { left: 0; }
+            .navbar .nav-links a { margin: 16px 0; }
+            .hamburger { display: block; }
+            .hamburger.active .bar:nth-child(2) { opacity: 0; }
+            .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+            .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+        }
+    </style>
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">PokéBuilder</a>
+            <div class="hamburger">
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            </div>
+            <div class="nav-links">
+                <a href="/pokedex.html">Pokédex</a>
+                <a href="/teams.html">My Teams</a>
+                <a href="/battle.html">PokéStreak</a>
+                <a href="/safari.html">Catch Pokémon</a>
+                <a href="/shop.html">Shop</a>
+                <a href="/auth.html" id="auth-btn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="safari-zone">
+            <div id="start-area">
+                <h2>Catch Pokémon</h2>
+                <p id="safari-intro">Explore the area to find and catch new Pokémon!</p>
+                <button id="explore-btn">Explore the Tall Grass</button>
+            </div>
+            
+            <div id="encounter-area">
+                <p id="encounter-message"></p>
+                <div class="sprite-container">
+                    <img id="encounter-sprite" src="" alt="Wild Pokémon">
+                    <img class="pokeball-animation" id="pokeball-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" alt="Pokéball">
+                </div>
+                <h3 id="encounter-name"></h3>
+                <div id="timing-bar-container">
+                    <div id="timing-bar-zones"></div>
+                    <div id="timing-bar-marker"></div>
+                </div>
+                <div class="action-buttons">
+                    <select id="ball-type-selector"></select>
+                    <button id="throw-ball-btn">Throw Ball</button>
+                    <button id="skip-btn">Skip</button>
+                    <a href="/"><button>Exit Safari</button></a>
+
+                </div>
+            </div>
+            <p id="result-message"></p>
+            <div id="pokeball-count"></div>
+            <div id="play-again-area">
+                 <button id="play-again-btn">Explore Again</button>
+                 <a href="/"><button>Exit Safari</button></a>
+            </div>
+        </div>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // --- Navbar ---
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        navLinks.classList.toggle('active');
+    });
+
+    const authToken = localStorage.getItem('pokemonToken');
+    if (!authToken) {
+        window.location.href = `/auth.html?redirect=${window.location.pathname}`;
+        return;
+    }
+
+    // --- DOM Elements ---
+    const startArea = document.getElementById('start-area');
+    const exploreBtn = document.getElementById('explore-btn');
+    const encounterArea = document.getElementById('encounter-area');
+    const encounterMessage = document.getElementById('encounter-message');
+    const encounterSprite = document.getElementById('encounter-sprite');
+    const pokeballSprite = document.getElementById('pokeball-sprite');
+    const encounterName = document.getElementById('encounter-name');
+    const timingBarZones = document.getElementById('timing-bar-zones');
+    const timingBarMarker = document.getElementById('timing-bar-marker');
+    const throwBallBtn = document.getElementById('throw-ball-btn');
+    const skipBtn = document.getElementById('skip-btn');
+    const ballTypeSelector = document.getElementById('ball-type-selector');
+    const resultMessage = document.getElementById('result-message');
+    const pokeballCountEl = document.getElementById('pokeball-count');
+    const playAgainArea = document.getElementById('play-again-area');
+    const playAgainBtn = document.getElementById('play-again-btn');
+
+    // --- Game State ---
+    let wildPokemon = null;
+    let animationId = null;
+    let markerPosition = 0;
+    let markerDirection = 1;
+    let markerSpeed = 3;
+    let playerProfile = null;
+    let standardPokemons = []; // The clean list with new IDs for sprites
+    const baseCatchRates = { "Bulbasaur": 45, "Ivysaur": 45, "Venusaur": 45, "Charmander": 45, "Charmeleon": 45, "Charizard": 45, "Squirtle": 45, "Wartortle": 45, "Blastoise": 45, "Caterpie": 255, "Metapod": 120, "Butterfree": 45, "Weedle": 255, "Kakuna": 120, "Beedrill": 45, "Pidgey": 255, "Pidgeotto": 120, "Pidgeot": 45, "Rattata": 255, "Raticate": 127, "Spearow": 255, "Fearow": 90, "Ekans": 255, "Arbok": 90, "Pikachu": 190, "Raichu": 75, "Sandshrew": 255, "Sandslash": 90, "Nidoran♀": 235, "Nidorina": 120, "Nidoqueen": 45, "Nidoran♂": 235, "Nidorino": 120, "Nidoking": 45, "Clefairy": 150, "Clefable": 25, "Vulpix": 190, "Ninetales": 75, "Jigglypuff": 170, "Wigglytuff": 50, "Zubat": 255, "Golbat": 90, "Oddish": 255, "Gloom": 120, "Vileplume": 45, "Paras": 190, "Parasect": 75, "Venonat": 190, "Venomoth": 75, "Diglett": 255, "Dugtrio": 50, "Meowth": 255, "Persian": 90, "Psyduck": 190, "Golduck": 75, "Mankey": 190, "Primeape": 75, "Growlithe": 190, "Arcanine": 75, "Poliwag": 255, "Poliwhirl": 120, "Poliwrath": 45, "Abra": 200, "Kadabra": 100, "Alakazam": 50, "Machop": 180, "Machoke": 90, "Machamp": 45, "Bellsprout": 255, "Weepinbell": 120, "Victreebel": 45, "Tentacool": 190, "Tentacruel": 60, "Geodude": 255, "Graveler": 120, "Golem": 45, "Ponyta": 190, "Rapidash": 60, "Slowpoke": 190, "Slowbro": 75, "Magnemite": 190, "Magneton": 60, "Farfetch’d": 45, "Doduo": 190, "Dodrio": 45, "Seel": 190, "Dewgong": 75, "Grimer": 190, "Muk": 75, "Shellder": 190, "Cloyster": 60, "Gastly": 190, "Haunter": 90, "Gengar": 45, "Onix": 45, "Drowzee": 190, "Hypno": 75, "Krabby": 225, "Kingler": 60, "Voltorb": 190, "Electrode": 60, "Exeggcute": 90, "Exeggutor": 45, "Cubone": 190, "Marowak": 75, "Hitmonlee": 45, "Hitmonchan": 45, "Lickitung": 45, "Koffing": 190, "Weezing": 60, "Rhyhorn": 120, "Rhydon": 60, "Chansey": 30, "Tangela": 45, "Kangaskhan": 45, "Horsea": 225, "Seadra": 75, "Goldeen": 225, "Seaking": 60, "Staryu": 225, "Starmie": 60, "Mr. Mime": 45, "Scyther": 45, "Jynx": 45, "Electabuzz": 45, "Magmar": 45, "Pinsir": 45, "Tauros": 45, "Magikarp": 255, "Gyarados": 45, "Lapras": 45, "Ditto": 35, "Eevee": 45, "Vaporeon": 45, "Jolteon": 45, "Flareon": 45, "Porygon": 45, "Omanyte": 45, "Omastar": 45, "Kabuto": 45, "Kabutops": 45, "Aerodactyl": 45, "Snorlax": 25, "Articuno": 3, "Zapdos": 3, "Moltres": 3, "Dratini": 45, "Dragonair": 45, "Dragonite": 45, "Mewtwo": 3, "Mew": 45 };
+
+    const apiFetch = async (endpoint, options = {}) => {
+        options.headers = { ...options.headers, 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` };
+        const response = await fetch(endpoint, options);
+        if (response.status === 401) {
+            localStorage.removeItem('pokemonToken');
+            window.location.href = `/auth.html?redirect=${window.location.pathname}`;
+            throw new Error("Unauthorized");
+        }
+        if (!response.ok) {
+            const errorData = await response.json();
+            resultMessage.textContent = `Error: ${errorData.detail || 'Something went wrong'}`;
+            throw new Error(errorData.detail);
+        }
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            return response.json();
+        }
+        return null;
+    };
+
+    const getSpriteUrl = (pokemon) => {
+        const displayPokemon = standardPokemons.find(p => p.original_id === pokemon.id);
+        const spriteId = displayPokemon ? displayPokemon.id : pokemon.id;
+        return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${spriteId}.png`;
+    };
+
+    const explore = async () => {
+        startArea.style.display = 'none';
+        playAgainArea.style.display = 'none';
+        resultMessage.textContent = 'Searching...';
+        encounterArea.style.display = 'none';
+        try {
+            wildPokemon = await apiFetch('/safari/encounter');
+            displayEncounter();
+        } catch (error) {
+            console.error(error);
+            startArea.style.display = 'block';
+            resultMessage.textContent = 'No more Pokémon to catch in this area!';
+        }
+    };
+
+    const displayEncounter = () => {
+        resultMessage.textContent = '';
+        encounterMessage.textContent = `A wild ${wildPokemon.name} appeared!`;
+        encounterSprite.src = getSpriteUrl(wildPokemon);
+        encounterSprite.style.transform = 'scale(1)';
+        encounterName.textContent = wildPokemon.name;
+        
+        const catchRate = baseCatchRates[wildPokemon.name.split('Mega')[0].trim()] || 45;
+        const speed = Math.max(0.5, (255 - catchRate) / 255 * 2 + 0.5);
+        encounterSprite.style.animation = `idle-animation ${speed}s ease-in-out infinite`;
+
+        setupTimingBar(wildPokemon);
+        startTimingBarAnimation();
+        encounterArea.style.display = 'block';
+        throwBallBtn.disabled = false;
+        skipBtn.disabled = false;
+    };
+
+    const setupTimingBar = (pokemon) => {
+        const baseRate = baseCatchRates[pokemon.name.split('Mega')[0].trim()] || 45;
+        const greenWidth = Math.max(5, (baseRate / 255) * 25);
+        const yellowWidth = greenWidth * 1.5;
+        const redWidth = 100 - (greenWidth + yellowWidth);
+        timingBarZones.innerHTML = `
+            <div class="zone zone-red" style="width: ${redWidth / 2}%"></div>
+            <div class="zone zone-yellow" style="width: ${yellowWidth / 2}%"></div>
+            <div class="zone zone-green" style="width: ${greenWidth}%"></div>
+            <div class="zone zone-yellow" style="width: ${yellowWidth / 2}%"></div>
+            <div class="zone zone-red" style="width: ${redWidth / 2}%"></div>
+        `;
+    };
+
+    const startTimingBarAnimation = () => {
+        if(animationId) cancelAnimationFrame(animationId);
+        markerPosition = 0;
+        markerDirection = 1;
+        const animate = () => {
+            markerPosition += markerSpeed * markerDirection;
+            if (markerPosition > 100 || markerPosition < 0) markerDirection *= -1;
+            timingBarMarker.style.left = `${markerPosition}%`;
+            animationId = requestAnimationFrame(animate);
+        };
+        animate();
+    };
+
+    const stopTimingBarAnimation = () => {
+        cancelAnimationFrame(animationId);
+        const zones = timingBarZones.children;
+        const redZone1End = parseFloat(zones[0].style.width);
+        const yellowZone1End = redZone1End + parseFloat(zones[1].style.width);
+        const greenZoneEnd = yellowZone1End + parseFloat(zones[2].style.width);
+        if (markerPosition > yellowZone1End && markerPosition < greenZoneEnd) return "excellent";
+        if (markerPosition > redZone1End && markerPosition < (greenZoneEnd + parseFloat(zones[3].style.width))) return "okay";
+        return "bad";
+    };
+
+    const throwBall = async () => {
+        const ballType = ballTypeSelector.value;
+        throwBallBtn.disabled = true;
+        skipBtn.disabled = true;
+        const throwQuality = stopTimingBarAnimation();
+        resultMessage.textContent = `You made an... ${throwQuality} throw!`;
+        try {
+            await animateBallThrow();
+            const result = await apiFetch('/safari/catch', {
+                method: 'POST',
+                body: JSON.stringify({ pokemon_id: wildPokemon.id, throw_quality: throwQuality, ball_type: ballType })
+            });
+            await animateBallShake(result.caught);
+            const message = result.caught ? `Gotcha! ${result.pokemon_name} was caught!` : `Oh no! ${result.pokemon_name} broke free!`;
+            if (result.caught) triggerConfetti();
+            updateBallSelector(result.balls_left);
+            endEncounter(message);
+        } catch (error) {
+            console.error(error);
+            endEncounter("Something went wrong!");
+        }
+    };
+
+    const endEncounter = (message) => {
+        resultMessage.textContent = message;
+        encounterArea.style.display = 'none';
+        playAgainArea.style.display = 'block';
+        startArea.style.display = 'block';
+        exploreBtn.style.display = 'none';
+    };
+    
+    const updateBallSelector = (balls) => {
+        ballTypeSelector.innerHTML = '';
+        let hasBalls = false;
+        if (balls) {
+            for (const [ball, count] of Object.entries(balls)) {
+                if (count > 0) {
+                    hasBalls = true;
+                    const option = document.createElement('option');
+                    option.value = ball;
+                    option.textContent = `${ball.charAt(0).toUpperCase() + ball.slice(1)} (x${count})`;
+                    ballTypeSelector.appendChild(option);
+                }
+            }
+        }
+        throwBallBtn.disabled = !hasBalls;
+        pokeballCountEl.textContent = `Your Pokéballs: Pokéball (x${balls.pokeball || 0}) | Great Ball (x${balls.greatball || 0}) | Ultra Ball (x${balls.ultraball || 0})`;
+    };
+    
+    const animateBallThrow = () => {
+        pokeballSprite.style.display = 'block';
+        pokeballSprite.style.transform = 'translate(-20px, -150px) scale(1)';
+        encounterSprite.style.transition = 'transform 0.5s ease-in';
+        return new Promise(resolve => setTimeout(() => {
+            pokeballSprite.style.transition = 'transform 0.5s ease-in';
+            pokeballSprite.style.transform = 'translate(-20px, 20px) scale(0.2)';
+            setTimeout(() => {
+                encounterSprite.style.transform = 'scale(0)';
+                resolve();
+            }, 500);
+        }, 100));
+    };
+
+    const animateBallShake = (isCaught) => {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                pokeballSprite.style.transform = 'translate(-20px, 50px) scale(1)';
+                pokeballSprite.style.animation = 'shake-animation 0.8s linear 3';
+                setTimeout(() => {
+                    pokeballSprite.style.animation = '';
+                    if (!isCaught) {
+                        encounterSprite.style.transform = 'scale(1)';
+                    }
+                    pokeballSprite.style.display = 'none';
+                    resolve();
+                }, 2400);
+            }, 600);
+        });
+    };
+    
+    const triggerConfetti = () => {
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = `${Math.random() * 100}vw`;
+            confetti.style.animationDelay = `${Math.random() * 1}s`;
+            confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 2000);
+        }
+    };
+    
+    const init = async () => {
+        document.getElementById('auth-btn').textContent = 'Logout';
+        document.getElementById('auth-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('pokemonToken');
+            window.location.href = '/auth.html';
+        });
+        
+        exploreBtn.addEventListener('click', explore);
+        playAgainBtn.addEventListener('click', explore);
+        skipBtn.addEventListener('click', explore);
+        throwBallBtn.addEventListener('click', throwBall);
+
+        try {
+            const allPokemonData = await apiFetch('/pokemon/');
+            let filtered = allPokemonData.filter(p => p.name && !p.name.toLowerCase().includes('mega'));
+            standardPokemons = filtered.map((p, index) => ({ ...p, original_id: p.id, id: index + 1 }));
+
+            playerProfile = await apiFetch('/game/profile');
+            updateBallSelector(playerProfile.pokeballs);
+        } catch (error) {
+            document.querySelector('.safari-zone').innerHTML = '<h2>Error</h2><p>Could not load your player data. Please log in again.</p>';
+        }
+    };
+
+    init();
+});
+</script>
+</body>
+</html>
