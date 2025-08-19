@@ -72,19 +72,32 @@
     <div class="container">
         <h1>Choose Your Partner!</h1>
         <p>Every great journey starts with a single choice. Pick your first Pokémon to begin your adventure.</p>
-        <div class="starter-selection" id="starter-selection">
+        <div class="starter-selection">
+            <div class="starter-card" data-pokemon-id="1">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png" alt="Bulbasaur">
+                <h3>Bulbasaur</h3>
             </div>
+            <div class="starter-card" data-pokemon-id="4">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png" alt="Charmander">
+                <h3>Charmander</h3>
+            </div>
+            <div class="starter-card" data-pokemon-id="7">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png" alt="Squirtle">
+                <h3>Squirtle</h3>
+            </div>
+        </div>
     </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     const authToken = localStorage.getItem('pokemonToken');
     if (!authToken) {
+        // If not logged in, can't choose a starter. Redirect to login.
         window.location.href = `/auth.html?redirect=${window.location.pathname}`;
         return;
     }
 
-    const starterSelection = document.getElementById('starter-selection');
+    const starterCards = document.querySelectorAll('.starter-card');
 
     const apiFetch = async (endpoint, options = {}) => {
         options.headers = { ...options.headers, 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` };
@@ -102,69 +115,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         return response.json();
     };
 
-    const renderStarters = (starters) => {
-        starterSelection.innerHTML = starters.map(p => `
-            <div class="starter-card" data-original-id="${p.id}" data-name="${p.name}">
-                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" alt="${p.name}">
-                <h3>${p.name}</h3>
-            </div>
-        `).join('');
-
-        document.querySelectorAll('.starter-card').forEach(card => {
-            card.addEventListener('click', handleStarterChoice);
-        });
-    };
-
-    const handleStarterChoice = async (e) => {
-        const card = e.currentTarget;
-        const pokemonId = parseInt(card.dataset.originalId);
-        const pokemonName = card.dataset.name;
-        
-        if (confirm(`Do you choose ${pokemonName} as your starter?`)) {
-            try {
-                await apiFetch('/safari/starter', {
-                    method: 'POST',
-                    body: JSON.stringify({ pokemon_id: pokemonId })
-                });
-                alert(`${pokemonName} is now your partner! Let's get started!`);
-                window.location.href = '/';
-            } catch (error) {
-                console.error("Failed to choose starter:", error);
-            }
-        }
-    };
-
-    const init = async () => {
-        try {
-            const collection = await apiFetch('/safari/collection');
-            if (collection && collection.length > 0) {
-                alert("You've already chosen a starter! Redirecting to the home page.");
-                window.location.href = '/';
-                return;
-            }
-
-            const allPokemonData = await apiFetch('/pokemon/');
+    starterCards.forEach(card => {
+        card.addEventListener('click', async () => {
+            const pokemonId = parseInt(card.dataset.pokemonId);
+            const pokemonName = card.querySelector('h3').textContent;
             
-            // --- THE DEFINITIVE FIX ---
-            // Find the starters by their original, permanent ID.
-            const starters = [
-                allPokemonData.find(p => p.id === 1), // Bulbasaur
-                allPokemonData.find(p => p.id === 4), // Charmander
-                allPokemonData.find(p => p.id === 7)  // Squirtle
-            ].filter(Boolean); // Filter out any nulls if a starter isn't found
-
-            if (starters.length < 3) {
-                throw new Error("Could not find all starter Pokémon in the database.");
+            if (confirm(`Do you choose ${pokemonName} as your starter?`)) {
+                try {
+                    await apiFetch('/safari/starter', {
+                        method: 'POST',
+                        body: JSON.stringify({ pokemon_id: pokemonId })
+                    });
+                    alert(`${pokemonName} is now your partner! Let's get started!`);
+                    window.location.href = '/'; // Redirect to the main landing page
+                } catch (error) {
+                    console.error("Failed to choose starter:", error);
+                    // The alert in apiFetch will handle showing the user the error message
+                }
             }
+        });
+    });
 
-            renderStarters(starters);
-        } catch (error) {
-            document.querySelector('.container').innerHTML = "<h2>Error</h2><p>Could not load data. Please try again.</p>";
-            console.error("Initialization failed:", error);
+    // Check if user has already chosen a starter
+    apiFetch('/safari/collection').then(collection => {
+        if (collection.length > 0) {
+            alert("You've already chosen a starter! Redirecting to the home page.");
+            window.location.href = '/';
         }
-    };
-
-    init();
+    });
 });
 </script>
 </body>
